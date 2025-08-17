@@ -1,0 +1,45 @@
+{
+    "prefix": "!",
+    "token": "your_discord_token_here",
+    "database": {
+        "path": "./database/bot.db"
+    },
+    "moderation": {
+        "defaultMuteDuration": 300,
+        "maxWarnings": 3,
+        "autoModeration": true
+    },
+    "music": {
+        "maxQueueSize": 50,
+        "defaultVolume": 50,
+        "leaveOnEmpty": true,
+        "leaveTimeout": 300
+    },
+    "economy": {
+        "dailyReward": 100,
+        "workReward": 50,
+        "currency": "coins"
+    },
+    "tickets": {
+        "category": "Support Tickets",
+        "supportRole": "Support Team"
+    },
+    "welcomeChannel": "welcome",
+    "logChannel": "bot-logs",
+    "rateLimits": {
+        "commands": 5,
+        "timeWindow": 10000
+    },
+    "backup": {
+        "interval": "0 0 * * *",
+        "retentionDays": 7
+    },
+    "botCustomization": {
+        "allowAvatarChanges": true,
+        "allowBannerChanges": true,
+        "allowNameChanges": true,
+        "maxNameLength": 32,
+        "minNameLength": 2,
+        "supportedImageFormats": ["jpg", "jpeg", "png", "gif", "webp"]
+    }
+}

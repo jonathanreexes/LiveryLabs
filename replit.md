@@ -1,0 +1,90 @@
+# Discord Bot
+
+## Overview
+
+This is a comprehensive Discord bot built with Node.js and the discord.js library. The bot provides a wide range of features including moderation tools, music playback, economy system, games, role management, support tickets, and various utility commands. It uses SQLite for data persistence and includes advanced features like rate limiting, automated backups, comprehensive logging, and bot appearance customization.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Core Framework
+- **Discord.js v14**: Modern Discord API wrapper with full slash command support
+- **Node.js Runtime**: Asynchronous event-driven architecture
+- **Modular Command System**: Commands organized by category with standardized structure using SlashCommandBuilder
+
+### Database Layer
+- **SQLite3**: Lightweight file-based database for data persistence
+- **Custom Database Wrapper**: Abstraction layer in `/database/database.js` for query management
+- **Automatic Schema Setup**: Database tables created from `/database/init.sql` on startup
+- **Data Storage**: User economy data, moderation logs, tickets, reaction roles, configuration, and bot customization history
+
+### Event System
+- **Discord Event Handlers**: Modular event system in `/events/` directory
+- **Member Events**: Welcome/farewell messages with embeds and auto-role assignment
+- **Interaction Handling**: Centralized slash command and component interaction processing
+- **Reaction Roles**: Automatic role assignment/removal based on message reactions
+
+### Command Architecture
+- **Slash Commands**: All commands use Discord's native slash command system
+- **Subcommand Pattern**: Commands grouped by functionality (economy, moderation, music, etc.)
+- **Permission Levels**: Role-based access control with custom permission manager
+- **Rate Limiting**: Per-user command rate limiting to prevent abuse
+- **Bot Customization Commands**: Admin-only commands for changing bot avatar, banner, and name
+
+### Music System
+- **Discord.js Voice**: Native Discord voice connection handling
+- **YouTube Integration**: ytdl-core and yt-search for YouTube audio streaming
+- **Queue Management**: Per-guild music queues with volume control and track persistence
+- **Voice Channel Management**: Automatic leave on empty with configurable timeout
+
+### Moderation Features
+- **Automated Actions**: Kick, ban, mute with duration support
+- **Warning System**: Cumulative warning tracking with configurable thresholds
+- **Auto-Moderation**: Configurable automatic moderation rules
+- **Audit Logging**: Comprehensive moderation action logging
+
+### Services Layer
+- **Backup Service**: Automated database backups using node-cron with retention policies
+- **Music Player**: Centralized music playback management with queue persistence
+- **Rate Limiter**: Token bucket algorithm for command rate limiting
+- **Permission Manager**: Hierarchical permission system with role-based access
+
+### Utility Systems
+- **Custom Logger**: File-based logging with multiple log levels and colored console output
+- **Configuration Management**: JSON-based configuration with hot-reload capability
+- **Error Handling**: Comprehensive error catching and user-friendly error messages
+- **Bot Customization**: Admin-only commands to customize bot avatar, banner, and username with history tracking
+
+### File Structure
+```
+├── commands/          # Slash command implementations
+├── events/           # Discord event handlers
+├── database/         # Database management and schemas
+├── services/         # Core service implementations
+├── utils/           # Utility classes and helpers
+├── logs/            # Application log files
+└── backups/         # Automated database backups
+```
+
+## External Dependencies
+
+### Core Dependencies
+- **discord.js**: Discord API interaction and gateway connection
+- **sqlite3**: Database engine for persistent data storage
+- **dotenv**: Environment variable management for sensitive configuration
+
+### Music Features
+- **@discordjs/voice**: Discord voice connection and audio streaming
+- **ytdl-core**: YouTube video/audio downloading and streaming
+- **yt-search**: YouTube search API for finding tracks by query
+
+### Utility Services
+- **node-cron**: Scheduled task management for automated backups
+- **fs-extra**: Enhanced file system operations for backup management
+
+### Development Tools
+- **File System Monitoring**: Dynamic command and event loading
+- **Process Management**: Graceful shutdown handling and resource cleanup
