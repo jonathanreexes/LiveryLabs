@@ -148,9 +148,9 @@ async function handleTicketCreation(interaction) {
 
 async function handleVerification(interaction) {
     try {
-        // Check verification settings
+        // Check verification settings including color
         const settings = await database.get(
-            'SELECT verified_role_id, verification_enabled FROM guild_settings WHERE guild_id = ?',
+            'SELECT verified_role_id, verification_enabled, verification_color FROM guild_settings WHERE guild_id = ?',
             [interaction.guild.id]
         );
 
@@ -182,10 +182,13 @@ async function handleVerification(interaction) {
         // Add verified role
         await member.roles.add(verifiedRole);
 
+        // Use stored verification color or default to green
+        const verificationColor = settings.verification_color || 0x00ff00;
+        
         const embed = new EmbedBuilder()
             .setTitle('✅ Verification Successful')
             .setDescription(`Welcome to the server! You have been verified and can now access all channels.`)
-            .setColor(0x00ff00)
+            .setColor(verificationColor)
             .setTimestamp();
 
         await interaction.reply({ embeds: [embed], ephemeral: true });

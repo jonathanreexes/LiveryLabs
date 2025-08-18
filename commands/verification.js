@@ -121,12 +121,12 @@ module.exports = {
                     }
                 }
 
-                // Store verification settings
+                // Store verification settings including color
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, verification_enabled, verified_role_id, verification_channel_id) 
-                     VALUES (?, 1, ?, ?)`,
-                    [guildId, verifiedRole.id, verificationChannel.id]
+                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color) 
+                     VALUES (?, 1, ?, ?, ?)`,
+                    [guildId, verifiedRole.id, verificationChannel.id, embedColor]
                 );
 
                 // Create verification message
