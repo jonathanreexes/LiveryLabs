@@ -71,9 +71,23 @@ process.on('uncaughtException', error => {
 
 // Login to Discord
 const token = process.env.DISCORD_TOKEN || config.token;
-if (!token) {
-    logger.error('No Discord token provided');
+if (!token || token === 'your_discord_token_here') {
+    logger.error('No valid Discord token provided. Please add your Discord bot token to the DISCORD_TOKEN secret.');
+    logger.info('Get your token from: https://discord.com/developers/applications');
     process.exit(1);
 }
 
-client.login(token);
+// Log token length for debugging (without revealing the token)
+logger.info(`Token length: ${token.length} characters`);
+
+logger.info('Attempting to connect to Discord...');
+client.login(token.trim()).catch(error => {
+    logger.error('Failed to login to Discord:', error);
+    if (error.code === 'TokenInvalid') {
+        logger.error('The provided Discord token is invalid. Please check:');
+        logger.error('1. Token is copied correctly from Discord Developer Portal');
+        logger.error('2. Bot section is configured in your Discord application');
+        logger.error('3. No extra spaces or characters in the token');
+    }
+    process.exit(1);
+});
