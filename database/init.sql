@@ -83,6 +83,30 @@ CREATE TABLE IF NOT EXISTS bot_customizations (
     UNIQUE(customization_type)
 );
 
+-- Giveaways
+CREATE TABLE IF NOT EXISTS giveaways (
+    message_id TEXT PRIMARY KEY,
+    guild_id TEXT NOT NULL,
+    channel_id TEXT NOT NULL,
+    host_id TEXT NOT NULL,
+    prize TEXT NOT NULL,
+    winners_count INTEGER DEFAULT 1,
+    end_time TEXT NOT NULL,
+    requirements TEXT,
+    active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Giveaway entries
+CREATE TABLE IF NOT EXISTS giveaway_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    giveaway_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    entry_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(giveaway_id, user_id),
+    FOREIGN KEY (giveaway_id) REFERENCES giveaways(message_id)
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_guild_user ON users(guild_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_warnings_user ON warnings(user_id, guild_id);
@@ -90,3 +114,5 @@ CREATE INDEX IF NOT EXISTS idx_tickets_user ON tickets(user_id, guild_id);
 CREATE INDEX IF NOT EXISTS idx_tickets_channel ON tickets(channel_id);
 CREATE INDEX IF NOT EXISTS idx_reaction_roles_message ON reaction_roles(guild_id, message_id);
 CREATE INDEX IF NOT EXISTS idx_bot_customizations_type ON bot_customizations(customization_type);
+CREATE INDEX IF NOT EXISTS idx_giveaways_guild ON giveaways(guild_id, active);
+CREATE INDEX IF NOT EXISTS idx_giveaway_entries_giveaway ON giveaway_entries(giveaway_id);

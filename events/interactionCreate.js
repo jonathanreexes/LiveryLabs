@@ -88,7 +88,8 @@ async function handleMessageComponent(interaction) {
     try {
         if (customId === 'verify_user') {
             await handleVerification(interaction);
-
+        } else if (customId === 'enter_giveaway') {
+            await handleGiveawayEntry(interaction);
         } else if (customId === 'create_ticket') {
             await handleTicketCreation(interaction);
         } else if (customId === 'ticket_close') {
@@ -208,6 +209,73 @@ async function handleVerification(interaction) {
     }
 }
 
+async function handleGiveawayEntry(interaction) {
+    try {
+        const messageId = interaction.message.id;
+        
+        // Check if giveaway exists and is active
+        const giveaway = await database.get(
+            'SELECT * FROM giveaways WHERE message_id = ? AND active = 1',
+            [messageId]
+        );
+
+        if (!giveaway) {
+            return await interaction.reply({
+                content: '❌ This giveaway is no longer active.',
+                ephemeral: true
+            });
+        }
+
+        // Check if giveaway has ended
+        const endTime = new Date(giveaway.end_time);
+        if (Date.now() >= endTime.getTime()) {
+            return await interaction.reply({
+                content: '❌ This giveaway has already ended.',
+                ephemeral: true
+            });
+        }
+
+        // Check if user already entered
+        const existingEntry = await database.get(
+            'SELECT * FROM giveaway_entries WHERE giveaway_id = ? AND user_id = ?',
+            [messageId, interaction.user.id]
+        );
+
+        if (existingEntry) {
+            return await interaction.reply({
+                content: '✅ You have already entered this giveaway! Good luck!',
+                ephemeral: true
+            });
+        }
+
+        // Add entry
+        await database.run(
+            'INSERT INTO giveaway_entries (giveaway_id, user_id) VALUES (?, ?)',
+            [messageId, interaction.user.id]
+        );
+
+        // Get total entries count
+        const entriesCount = await database.get(
+            'SELECT COUNT(*) as count FROM giveaway_entries WHERE giveaway_id = ?',
+            [messageId]
+        );
+
+        await interaction.reply({
+            content: `🎉 You've successfully entered the giveaway for **${giveaway.prize}**!\n\n**Total Entries:** ${entriesCount.count}`,
+            ephemeral: true
+        });
+
+        logger.info(`User ${interaction.user.tag} entered giveaway: ${giveaway.prize}`);
+
+    } catch (error) {
+        logger.error('Error handling giveaway entry:', error);
+        
+        await interaction.reply({
+            content: '❌ An error occurred while entering the giveaway. Please try again.',
+            ephemeral: true
+        });
+    }
+}
 
 async function handleTicketClose(interaction) {
     // Check if this is a ticket channel
