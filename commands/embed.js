@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
@@ -9,8 +9,7 @@ const logger = require('../utils/logger');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('embed')
-        .setDescription('Create a custom embed message')
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
+        .setDescription('Create a custom embed message (Owner Only)')
         .addStringOption(option =>
             option.setName('title')
                 .setDescription('Embed title')
@@ -46,6 +45,14 @@ module.exports = {
 
     async execute(interaction) {
         try {
+            // Check if user is server owner
+            if (interaction.user.id !== interaction.guild.ownerId) {
+                return await interaction.reply({
+                    content: '❌ This command can only be used by the server owner.',
+                    ephemeral: true
+                });
+            }
+
             await interaction.deferReply({ ephemeral: true });
 
             const title = interaction.options.getString('title');
