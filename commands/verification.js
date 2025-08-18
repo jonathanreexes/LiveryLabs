@@ -13,6 +13,23 @@ module.exports = {
                 .addRoleOption(option =>
                     option.setName('verified_role')
                         .setDescription('Role to give verified users (will create "Verified" if not provided)')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('message')
+                        .setDescription('Custom verification message')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('color')
+                        .setDescription('Border color for the message')
+                        .addChoices(
+                            { name: 'Blue (Discord)', value: 'blue' },
+                            { name: 'Green', value: 'green' },
+                            { name: 'Red', value: 'red' },
+                            { name: 'Purple', value: 'purple' },
+                            { name: 'Orange', value: 'orange' },
+                            { name: 'Yellow', value: 'yellow' },
+                            { name: 'Pink', value: 'pink' }
+                        )
                         .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
@@ -55,7 +72,21 @@ module.exports = {
                 }
 
                 let verifiedRole = interaction.options.getRole('verified_role');
+                const customMessage = interaction.options.getString('message');
+                const colorChoice = interaction.options.getString('color');
                 const verificationChannel = interaction.channel;
+
+                // Color mapping
+                const colors = {
+                    'blue': 0x5865F2,      // Discord blurple
+                    'green': 0x57F287,     // Green
+                    'red': 0xED4245,       // Red  
+                    'purple': 0x9B59B6,    // Purple
+                    'orange': 0xE67E22,    // Orange
+                    'yellow': 0xF1C40F,    // Yellow
+                    'pink': 0xE91E63       // Pink
+                };
+                const embedColor = colors[colorChoice] || 0x5865F2; // Default to blue
 
                 // Create verified role if not provided
                 if (!verifiedRole) {
@@ -82,10 +113,18 @@ module.exports = {
                 );
 
                 // Create verification message
+                const defaultMessage = 'Welcome to our server! Please click the button below to verify yourself and gain access to all channels and features.';
+                const description = customMessage || defaultMessage;
+                
                 const verifyEmbed = new EmbedBuilder()
                     .setTitle('🔐 Server Verification')
-                    .setDescription('Click the button below to verify yourself and gain access to the server!')
-                    .setColor(0x00ff00)
+                    .setDescription(description)
+                    .setColor(embedColor)
+                    .addFields(
+                        { name: '📋 What happens next?', value: 'After verification, you\'ll get the Verified role and access to the full server.', inline: false },
+                        { name: '❓ Need help?', value: 'If you have issues, contact a staff member.', inline: false }
+                    )
+                    .setFooter({ text: 'Click the button below to get started!' })
                     .setTimestamp();
 
                 const verifyButton = new ActionRowBuilder()
