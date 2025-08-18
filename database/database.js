@@ -36,16 +36,54 @@ class Database {
         const sql = fs.readFileSync(sqlPath, 'utf8');
         
         return new Promise((resolve, reject) => {
-            this.db.exec(sql, (err) => {
+            this.db.exec(sql, async (err) => {
                 if (err) {
                     logger.error('Error creating tables:', err);
                     reject(err);
                 } else {
                     logger.info('Database tables created successfully');
+                    // Run migrations for existing databases
+                    await this.runMigrations();
                     resolve();
                 }
             });
         });
+    }
+
+    async runMigrations() {
+        try {
+            // Check if new columns exist, add them if they don't
+            const migrations = [
+                'ALTER TABLE guild_settings ADD COLUMN verification_enabled INTEGER DEFAULT 0',
+                'ALTER TABLE guild_settings ADD COLUMN verified_role_id TEXT',
+                'ALTER TABLE guild_settings ADD COLUMN verification_channel_id TEXT',
+                'ALTER TABLE guild_settings ADD COLUMN anti_spam INTEGER DEFAULT 0',
+                'ALTER TABLE guild_settings ADD COLUMN anti_nuke INTEGER DEFAULT 0',
+                'ALTER TABLE guild_settings ADD COLUMN updated_at TEXT DEFAULT (datetime("now"))'
+            ];
+
+            for (const migration of migrations) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        this.db.run(migration, (err) => {
+                            if (err && !err.message.includes('duplicate column name')) {
+                                reject(err);
+                            } else {
+                                resolve();
+                            }
+                        });
+                    });
+                } catch (error) {
+                    // Ignore duplicate column errors
+                    if (!error.message.includes('duplicate column name')) {
+                        logger.warn('Migration warning:', error.message);
+                    }
+                }
+            }
+            logger.info('Database migrations completed');
+        } catch (error) {
+            logger.error('Error running migrations:', error);
+        }
     }
 
     // User management
@@ -160,6 +198,34 @@ class Database {
                     else resolve(row);
                 }
             );
+        });
+    }
+
+    // Generic database methods for commands
+    async get(query, params = []) {
+        return new Promise((resolve, reject) => {
+            this.db.get(query, params, (err, row) => {
+                if (err) reject(err);
+                else resolve(row);
+            });
+        });
+    }
+
+    async run(query, params = []) {
+        return new Promise((resolve, reject) => {
+            this.db.run(query, params, function(err) {
+                if (err) reject(err);
+                else resolve({ lastID: this.lastID, changes: this.changes });
+            });
+        });
+    }
+
+    async all(query, params = []) {
+        return new Promise((resolve, reject) => {
+            this.db.all(query, params, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
         });
     }
 

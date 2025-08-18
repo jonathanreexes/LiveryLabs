@@ -14,13 +14,20 @@ module.exports = {
         if (message.author.bot || !message.guild) return;
 
         try {
-            // Check if anti-spam is enabled
-            const settings = await database.get(
-                'SELECT anti_spam FROM guild_settings WHERE guild_id = ?',
-                [message.guild.id]
-            );
+            // Check if anti-spam is enabled  
+            const settings = await new Promise((resolve, reject) => {
+                database.db.get(
+                    'SELECT anti_spam FROM guild_settings WHERE guild_id = ?',
+                    [message.guild.id],
+                    (err, row) => {
+                        if (err) reject(err);
+                        else resolve(row);
+                    }
+                );
+            });
 
-            if (!settings?.anti_spam) return;
+            // If no settings exist or anti-spam is disabled, skip
+            if (!settings || !settings.anti_spam) return;
 
             const userId = message.author.id;
             const guildId = message.guild.id;
@@ -77,7 +84,7 @@ module.exports = {
             await checkDuplicateAccount(message);
 
         } catch (error) {
-            logger.error('Error in anti-spam system:', error);
+            logger.error('Error in anti-spam system:', error.message || error);
         }
     }
 };

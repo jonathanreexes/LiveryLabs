@@ -13,18 +13,25 @@ module.exports = {
     async execute(oldMember, newMember) {
         try {
             // Check if anti-nuke is enabled
-            const settings = await database.get(
-                'SELECT anti_nuke FROM guild_settings WHERE guild_id = ?',
-                [newMember.guild.id]
-            );
+            const settings = await new Promise((resolve, reject) => {
+                database.db.get(
+                    'SELECT anti_nuke FROM guild_settings WHERE guild_id = ?',
+                    [newMember.guild.id],
+                    (err, row) => {
+                        if (err) reject(err);
+                        else resolve(row);
+                    }
+                );
+            });
 
-            if (!settings?.anti_nuke) return;
+            // If no settings exist or anti-nuke is disabled, skip
+            if (!settings || !settings.anti_nuke) return;
 
             // Track role changes for anti-nuke
             await trackRoleChanges(oldMember, newMember);
 
         } catch (error) {
-            logger.error('Error in guildMemberUpdate anti-nuke:', error);
+            logger.error('Error in guildMemberUpdate anti-nuke:', error.message || error);
         }
     }
 };
