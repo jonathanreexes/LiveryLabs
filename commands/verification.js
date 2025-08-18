@@ -38,7 +38,7 @@ module.exports = {
             subcommand
                 .setName('status')
                 .setDescription('Check verification status'))
-        .setDefaultMemberPermissions(null),
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
@@ -76,8 +76,8 @@ module.exports = {
                 // Store verification settings
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, updated_at) 
-                     VALUES (?, 1, ?, ?, datetime('now'))`,
+                     (guild_id, verification_enabled, verified_role_id, verification_channel_id) 
+                     VALUES (?, 1, ?, ?)`,
                     [guildId, verifiedRole.id, verificationChannel.id]
                 );
 
@@ -116,8 +116,8 @@ module.exports = {
                 const enabled = action === 'enable';
 
                 await database.run(
-                    `INSERT OR REPLACE INTO guild_settings (guild_id, verification_enabled, updated_at) 
-                     VALUES (?, ?, datetime('now'))`,
+                    `INSERT OR REPLACE INTO guild_settings (guild_id, verification_enabled) 
+                     VALUES (?, ?)`,
                     [guildId, enabled ? 1 : 0]
                 );
 
