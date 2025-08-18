@@ -38,7 +38,7 @@ module.exports = {
             subcommand
                 .setName('status')
                 .setDescription('Check verification status'))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+        .setDefaultMemberPermissions(null),
 
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
