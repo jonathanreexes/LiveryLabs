@@ -11,16 +11,8 @@ module.exports = {
                 .setName('setup')
                 .setDescription('Setup verification system in current channel')
                 .addRoleOption(option =>
-                    option.setName('onboarding_role')
-                        .setDescription('Role to give after verification (will create "Onboarding" if not provided)')
-                        .setRequired(false))
-                .addRoleOption(option =>
                     option.setName('verified_role')
-                        .setDescription('Role to give after rules acceptance (will create "Verified" if not provided)')
-                        .setRequired(false))
-                .addChannelOption(option =>
-                    option.setName('rules_channel')
-                        .setDescription('Channel where users read rules after verification')
+                        .setDescription('Role to give verified users (will create "Verified" if not provided)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('message')
@@ -82,9 +74,7 @@ module.exports = {
                     });
                 }
 
-                let onboardingRole = interaction.options.getRole('onboarding_role');
                 let verifiedRole = interaction.options.getRole('verified_role');
-                const rulesChannel = interaction.options.getChannel('rules_channel');
                 const customMessage = interaction.options.getString('message');
                 const customTitle = interaction.options.getString('title');
                 const successTitle = interaction.options.getString('success_title');
@@ -146,28 +136,12 @@ module.exports = {
                     }
                 }
 
-                // Create member role if not provided
-                if (!memberRole) {
-                    try {
-                        memberRole = await interaction.guild.roles.create({
-                            name: 'Member',
-                            color: 0x0099ff,
-                            reason: 'Two-step verification system setup'
-                        });
-                    } catch (error) {
-                        return await interaction.reply({ 
-                            content: '❌ Could not create member role. Please create a role and specify it manually.', 
-                            ephemeral: true 
-                        });
-                    }
-                }
-
                 // Store verification settings including all customizations
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title, success_title, success_message, rules_channel_id, member_role_id) 
-                     VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle, successTitle, successMessage, rulesChannel?.id, memberRole.id]
+                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title, success_title, success_message) 
+                     VALUES (?, 1, ?, ?, ?, ?, ?, ?)`,
+                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle, successTitle, successMessage]
                 );
 
                 // Create verification message
@@ -196,32 +170,9 @@ module.exports = {
                     components: [verifyButton] 
                 });
 
-                // Create rules message if rules channel is provided
-                if (rulesChannel) {
-                    const rulesEmbed = new EmbedBuilder()
-                        .setTitle('📋 Server Rules')
-                        .setDescription('Please read our server rules carefully and click "I Accept" below to gain full access to all channels.\n\n**Rules:**\n1. Be respectful to all members\n2. No spam or excessive self-promotion\n3. Use appropriate channels for discussions\n4. Follow Discord Terms of Service\n5. Have fun and be part of our community!')
-                        .setColor(embedColor)
-                        .setTimestamp();
-
-                    const acceptButton = new ActionRowBuilder()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('accept_rules')
-                                .setLabel('I Accept the Rules')
-                                .setStyle(ButtonStyle.Primary)
-                                .setEmoji('✅')
-                        );
-
-                    await rulesChannel.send({ 
-                        embeds: [rulesEmbed], 
-                        components: [acceptButton] 
-                    });
-                }
-
                 const embed = new EmbedBuilder()
                     .setTitle('✅ Verification Setup Complete')
-                    .setDescription(`Two-step verification system configured!\n\n**Step 1 - Verification Role:** ${verifiedRole}\n**Step 2 - Member Role:** ${memberRole}\n**Verification Channel:** ${verificationChannel}${rulesChannel ? `\n**Rules Channel:** ${rulesChannel}` : ''}\n\n*Users will verify first, then accept rules to gain full access.*`)
+                    .setDescription(`Single-step verification system configured!\n\n**Verified Role:** ${verifiedRole}\n**Channel:** ${verificationChannel}\n\n*New users will click verify and gain immediate access to your server.*`)
                     .setColor(0x00ff00)
                     .setTimestamp();
 

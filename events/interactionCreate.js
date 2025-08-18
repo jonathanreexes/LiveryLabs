@@ -88,8 +88,7 @@ async function handleMessageComponent(interaction) {
     try {
         if (customId === 'verify_user') {
             await handleVerification(interaction);
-        } else if (customId === 'accept_rules') {
-            await handleRulesAcceptance(interaction);
+
         } else if (customId === 'create_ticket') {
             await handleTicketCreation(interaction);
         } else if (customId === 'ticket_close') {
@@ -152,7 +151,7 @@ async function handleVerification(interaction) {
     try {
         // Check verification settings including all customizations
         const settings = await database.get(
-            'SELECT verified_role_id, verification_enabled, verification_color, success_title, success_message, rules_channel_id FROM guild_settings WHERE guild_id = ?',
+            'SELECT verified_role_id, verification_enabled, verification_color, success_title, success_message FROM guild_settings WHERE guild_id = ?',
             [interaction.guild.id]
         );
 
@@ -187,17 +186,7 @@ async function handleVerification(interaction) {
         // Use stored verification color or default to green
         const verificationColor = settings.verification_color || 0x00ff00;
         const defaultSuccessTitle = '✅ Verification Successful';
-        let defaultSuccessMessage = 'Welcome to the server! You have been verified.';
-        
-        // Check if rules channel is configured for two-step process
-        if (settings.rules_channel_id) {
-            const rulesChannel = interaction.guild.channels.cache.get(settings.rules_channel_id);
-            if (rulesChannel) {
-                defaultSuccessMessage = `Welcome to the server! You have been verified.\n\n**Next Step:** Please visit ${rulesChannel} to read our rules and complete your registration.`;
-            }
-        } else {
-            defaultSuccessMessage = 'Welcome to the server! You have been verified and can now access all channels.';
-        }
+        const defaultSuccessMessage = 'Welcome to the server! You have been verified and can now access all channels.';
         
         const embed = new EmbedBuilder()
             .setTitle(settings.success_title || defaultSuccessTitle)
@@ -219,72 +208,6 @@ async function handleVerification(interaction) {
     }
 }
 
-async function handleRulesAcceptance(interaction) {
-    try {
-        // Get server settings
-        const settings = await database.get(
-            'SELECT member_role_id, verified_role_id, verification_color FROM guild_settings WHERE guild_id = ?',
-            [interaction.guild.id]
-        );
-
-        if (!settings?.member_role_id || !settings?.verified_role_id) {
-            return interaction.reply({
-                content: '❌ Rules acceptance system is not properly configured on this server.',
-                ephemeral: true
-            });
-        }
-
-        const member = interaction.member;
-        const verifiedRole = interaction.guild.roles.cache.get(settings.verified_role_id);
-        const memberRole = interaction.guild.roles.cache.get(settings.member_role_id);
-
-        if (!verifiedRole || !memberRole) {
-            return interaction.reply({
-                content: '❌ Required roles not found. Please contact an administrator.',
-                ephemeral: true
-            });
-        }
-
-        // Check if user has verified role (Step 1 completed)
-        if (!member.roles.cache.has(verifiedRole.id)) {
-            return interaction.reply({
-                content: '❌ You must complete verification first before accepting rules.',
-                ephemeral: true
-            });
-        }
-
-        // Check if user already has member role
-        if (member.roles.cache.has(memberRole.id)) {
-            return interaction.reply({
-                content: '✅ You have already accepted the rules and have full access!',
-                ephemeral: true
-            });
-        }
-
-        // Add member role
-        await member.roles.add(memberRole);
-
-        const verificationColor = settings.verification_color || 0x00ff00;
-        
-        const embed = new EmbedBuilder()
-            .setTitle('🎉 Welcome to the Community!')
-            .setDescription('Thank you for accepting our rules! You now have full access to all channels and features. Welcome aboard!')
-            .setColor(verificationColor)
-            .setTimestamp();
-
-        await interaction.reply({ embeds: [embed], ephemeral: true });
-        
-        logger.info(`User ${member.user.tag} accepted rules and gained full access in guild ${interaction.guild.id}`);
-
-    } catch (error) {
-        logger.error('Error in rules acceptance process:', error);
-        
-        await interaction.reply({
-            content: '❌ An error occurred while processing rules acceptance. Please try again or contact an administrator.',
-            ephemeral: true
-        });
-    }
-}
 
 async function handleTicketClose(interaction) {
     // Check if this is a ticket channel
