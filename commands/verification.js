@@ -11,12 +11,12 @@ module.exports = {
                 .setName('setup')
                 .setDescription('Setup verification system in current channel')
                 .addRoleOption(option =>
-                    option.setName('verified_role')
-                        .setDescription('Role to give verified users (will create "Verified" if not provided)')
+                    option.setName('onboarding_role')
+                        .setDescription('Role to give after verification (will create "Onboarding" if not provided)')
                         .setRequired(false))
                 .addRoleOption(option =>
-                    option.setName('member_role')
-                        .setDescription('Role to give after rules acceptance (will create "Member" if not provided)')
+                    option.setName('verified_role')
+                        .setDescription('Role to give after rules acceptance (will create "Verified" if not provided)')
                         .setRequired(false))
                 .addChannelOption(option =>
                     option.setName('rules_channel')
@@ -82,8 +82,8 @@ module.exports = {
                     });
                 }
 
+                let onboardingRole = interaction.options.getRole('onboarding_role');
                 let verifiedRole = interaction.options.getRole('verified_role');
-                let memberRole = interaction.options.getRole('member_role');
                 const rulesChannel = interaction.options.getChannel('rules_channel');
                 const customMessage = interaction.options.getString('message');
                 const customTitle = interaction.options.getString('title');
