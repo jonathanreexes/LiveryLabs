@@ -14,6 +14,7 @@ Preferred communication style: Simple, everyday language.
 - Livery Labs bot focused on: music, games, welcome/leave messages, verification, light anti-spam, and anti-nuke protection
 - Removed heavy moderation commands (kick, ban, warn) to avoid conflicts with other bots
 - Verification system successfully configured and tested (August 18, 2025)
+- Complete verification customization implemented: custom titles, messages, success responses, and colors for full branding control
 
 ## System Architecture
 
@@ -40,7 +41,11 @@ Preferred communication style: Simple, everyday language.
 - **Permission Levels**: Role-based access control with custom permission manager
 - **Rate Limiting**: Per-user command rate limiting to prevent abuse
 - **Bot Customization Commands**: Admin-only commands for changing bot avatar, banner, and name
-- **Verification System**: Admin-only `/verification setup` command with automatic role creation and button-based user verification
+- **Verification System**: Owner-only `/verification setup` command with comprehensive customization options:
+  - Custom verification prompt title and message
+  - Custom success message title and text
+  - Hex color code support for consistent branding
+  - Automatic role creation and button-based user verification
 
 ### Music System
 - **Discord.js Voice**: Native Discord voice connection handling
