@@ -52,7 +52,13 @@ CREATE TABLE IF NOT EXISTS guild_settings (
     log_channel TEXT,
     mute_role TEXT,
     prefix TEXT DEFAULT '!',
-    created_at INTEGER DEFAULT (strftime('%s', 'now'))
+    verification_enabled INTEGER DEFAULT 0,
+    verified_role_id TEXT,
+    verification_channel_id TEXT,
+    anti_spam INTEGER DEFAULT 0,
+    anti_nuke INTEGER DEFAULT 0,
+    created_at INTEGER DEFAULT (strftime('%s', 'now')),
+    updated_at TEXT DEFAULT (datetime('now'))
 );
 
 -- Music queue table

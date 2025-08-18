@@ -86,7 +86,9 @@ async function handleMessageComponent(interaction) {
     const { customId } = interaction;
 
     try {
-        if (customId === 'create_ticket') {
+        if (customId === 'verify_user') {
+            await handleVerification(interaction);
+        } else if (customId === 'create_ticket') {
             await handleTicketCreation(interaction);
         } else if (customId === 'ticket_close') {
             await handleTicketClose(interaction);
@@ -141,6 +143,62 @@ async function handleTicketCreation(interaction) {
         };
         
         await ticketCommand.execute(interaction);
+    }
+}
+
+async function handleVerification(interaction) {
+    try {
+        // Check verification settings
+        const settings = await database.get(
+            'SELECT verified_role_id, verification_enabled FROM guild_settings WHERE guild_id = ?',
+            [interaction.guild.id]
+        );
+
+        if (!settings?.verification_enabled || !settings?.verified_role_id) {
+            return interaction.reply({
+                content: '❌ Verification is not properly configured on this server.',
+                ephemeral: true
+            });
+        }
+
+        const member = interaction.member;
+        const verifiedRole = interaction.guild.roles.cache.get(settings.verified_role_id);
+
+        if (!verifiedRole) {
+            return interaction.reply({
+                content: '❌ Verified role not found. Please contact an administrator.',
+                ephemeral: true
+            });
+        }
+
+        // Check if user already has verified role
+        if (member.roles.cache.has(verifiedRole.id)) {
+            return interaction.reply({
+                content: '✅ You are already verified!',
+                ephemeral: true
+            });
+        }
+
+        // Add verified role
+        await member.roles.add(verifiedRole);
+
+        const embed = new EmbedBuilder()
+            .setTitle('✅ Verification Successful')
+            .setDescription(`Welcome to the server! You have been verified and can now access all channels.`)
+            .setColor(0x00ff00)
+            .setTimestamp();
+
+        await interaction.reply({ embeds: [embed], ephemeral: true });
+        
+        logger.info(`User ${member.user.tag} verified in guild ${interaction.guild.id}`);
+
+    } catch (error) {
+        logger.error('Error in verification process:', error);
+        
+        await interaction.reply({
+            content: '❌ An error occurred during verification. Please try again or contact an administrator.',
+            ephemeral: true
+        });
     }
 }
 

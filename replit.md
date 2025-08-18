@@ -8,6 +8,12 @@ This is a comprehensive Discord bot built with Node.js and the discord.js librar
 
 Preferred communication style: Simple, everyday language.
 
+**Bot Configuration (Updated):**
+- Using dedicated ticketing bot for support tickets
+- Using Dyno bot for heavy moderation and community management  
+- Livery Labs bot focused on: music, games, welcome/leave messages, verification, light anti-spam, and anti-nuke protection
+- Removed heavy moderation commands (kick, ban, warn) to avoid conflicts with other bots
+
 ## System Architecture
 
 ### Core Framework
