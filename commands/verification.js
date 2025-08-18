@@ -153,8 +153,7 @@ module.exports = {
                 const verifyEmbed = new EmbedBuilder()
                     .setTitle(title)
                     .setDescription(description)
-                    .setColor(embedColor)
-                    .setTimestamp();
+                    .setColor(embedColor);
 
                 const verifyButton = new ActionRowBuilder()
                     .addComponents(
