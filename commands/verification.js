@@ -9,15 +9,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('setup')
-                .setDescription('Setup verification system')
+                .setDescription('Setup verification system in current channel')
                 .addRoleOption(option =>
                     option.setName('verified_role')
-                        .setDescription('Role to give verified users')
-                        .setRequired(true))
-                .addChannelOption(option =>
-                    option.setName('verification_channel')
-                        .setDescription('Channel for verification')
-                        .setRequired(true)))
+                        .setDescription('Role to give verified users (will create "Verified" if not provided)')
+                        .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('toggle')
@@ -50,8 +46,32 @@ module.exports = {
 
         try {
             if (subcommand === 'setup') {
-                const verifiedRole = interaction.options.getRole('verified_role');
-                const verificationChannel = interaction.options.getChannel('verification_channel');
+                // Check permissions
+                if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                    return await interaction.reply({ 
+                        content: '❌ You need "Manage Server" permissions to set up verification!', 
+                        ephemeral: true 
+                    });
+                }
+
+                let verifiedRole = interaction.options.getRole('verified_role');
+                const verificationChannel = interaction.channel;
+
+                // Create verified role if not provided
+                if (!verifiedRole) {
+                    try {
+                        verifiedRole = await interaction.guild.roles.create({
+                            name: 'Verified',
+                            color: 0x00ff00,
+                            reason: 'Verification system setup'
+                        });
+                    } catch (error) {
+                        return await interaction.reply({ 
+                            content: '❌ Could not create verified role. Please create a role and specify it manually.', 
+                            ephemeral: true 
+                        });
+                    }
+                }
 
                 // Store verification settings
                 await database.run(
@@ -84,7 +104,7 @@ module.exports = {
 
                 const embed = new EmbedBuilder()
                     .setTitle('✅ Verification Setup Complete')
-                    .setDescription(`Verification system configured!\n\n**Verified Role:** ${verifiedRole}\n**Channel:** ${verificationChannel}`)
+                    .setDescription(`Verification system configured!\n\n**Verified Role:** ${verifiedRole}\n**Channel:** ${verificationChannel}\n\n*New users will now need to click the verify button to access your server.*`)
                     .setColor(0x00ff00)
                     .setTimestamp();
 
