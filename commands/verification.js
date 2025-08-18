@@ -23,6 +23,14 @@ module.exports = {
                         .setDescription('Custom verification title')
                         .setRequired(false))
                 .addStringOption(option =>
+                    option.setName('success_title')
+                        .setDescription('Custom success message title')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('success_message')
+                        .setDescription('Custom success message text')
+                        .setRequired(false))
+                .addStringOption(option =>
                     option.setName('color')
                         .setDescription('Border color: preset name (blue/green/red/purple/orange/yellow/pink) or hex code (#FF5733)')
                         .setRequired(false)))
@@ -69,6 +77,8 @@ module.exports = {
                 let verifiedRole = interaction.options.getRole('verified_role');
                 const customMessage = interaction.options.getString('message');
                 const customTitle = interaction.options.getString('title');
+                const successTitle = interaction.options.getString('success_title');
+                const successMessage = interaction.options.getString('success_message');
                 const colorChoice = interaction.options.getString('color');
                 const verificationChannel = interaction.channel;
 
@@ -126,12 +136,12 @@ module.exports = {
                     }
                 }
 
-                // Store verification settings including color and title
+                // Store verification settings including all customizations
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title) 
-                     VALUES (?, 1, ?, ?, ?, ?)`,
-                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle]
+                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title, success_title, success_message) 
+                     VALUES (?, 1, ?, ?, ?, ?, ?, ?)`,
+                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle, successTitle, successMessage]
                 );
 
                 // Create verification message
