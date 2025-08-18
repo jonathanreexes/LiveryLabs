@@ -20,16 +20,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('color')
-                        .setDescription('Border color for the message')
-                        .addChoices(
-                            { name: 'Blue (Discord)', value: 'blue' },
-                            { name: 'Green', value: 'green' },
-                            { name: 'Red', value: 'red' },
-                            { name: 'Purple', value: 'purple' },
-                            { name: 'Orange', value: 'orange' },
-                            { name: 'Yellow', value: 'yellow' },
-                            { name: 'Pink', value: 'pink' }
-                        )
+                        .setDescription('Border color: preset name (blue/green/red/purple/orange/yellow/pink) or hex code (#FF5733)')
                         .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
@@ -55,7 +46,7 @@ module.exports = {
             subcommand
                 .setName('status')
                 .setDescription('Check verification status'))
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
@@ -63,10 +54,10 @@ module.exports = {
 
         try {
             if (subcommand === 'setup') {
-                // Check permissions
-                if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
+                // Check if user is server owner
+                if (interaction.user.id !== interaction.guild.ownerId) {
                     return await interaction.reply({ 
-                        content: '❌ You need "Manage Server" permissions to set up verification!', 
+                        content: '❌ Only the server owner can customize verification settings!', 
                         ephemeral: true 
                     });
                 }
@@ -76,17 +67,43 @@ module.exports = {
                 const colorChoice = interaction.options.getString('color');
                 const verificationChannel = interaction.channel;
 
-                // Color mapping
-                const colors = {
-                    'blue': 0x5865F2,      // Discord blurple
-                    'green': 0x57F287,     // Green
-                    'red': 0xED4245,       // Red  
-                    'purple': 0x9B59B6,    // Purple
-                    'orange': 0xE67E22,    // Orange
-                    'yellow': 0xF1C40F,    // Yellow
-                    'pink': 0xE91E63       // Pink
-                };
-                const embedColor = colors[colorChoice] || 0x5865F2; // Default to blue
+                // Color processing - support both presets and hex codes
+                let embedColor = 0x5865F2; // Default Discord blue
+                
+                if (colorChoice) {
+                    // Check if it's a hex color code
+                    if (colorChoice.startsWith('#')) {
+                        const hexValue = colorChoice.slice(1);
+                        if (/^[0-9A-Fa-f]{6}$/.test(hexValue)) {
+                            embedColor = parseInt(hexValue, 16);
+                        } else {
+                            return await interaction.reply({ 
+                                content: '❌ Invalid hex color code! Use format #FF5733', 
+                                ephemeral: true 
+                            });
+                        }
+                    } else {
+                        // Preset color names
+                        const colors = {
+                            'blue': 0x5865F2,      // Discord blurple
+                            'green': 0x57F287,     // Green
+                            'red': 0xED4245,       // Red  
+                            'purple': 0x9B59B6,    // Purple
+                            'orange': 0xE67E22,    // Orange
+                            'yellow': 0xF1C40F,    // Yellow
+                            'pink': 0xE91E63       // Pink
+                        };
+                        
+                        if (colors[colorChoice.toLowerCase()]) {
+                            embedColor = colors[colorChoice.toLowerCase()];
+                        } else {
+                            return await interaction.reply({ 
+                                content: '❌ Invalid color! Use: blue, green, red, purple, orange, yellow, pink, or hex code (#FF5733)', 
+                                ephemeral: true 
+                            });
+                        }
+                    }
+                }
 
                 // Create verified role if not provided
                 if (!verifiedRole) {
