@@ -137,11 +137,6 @@ module.exports = {
                     .setTitle('🔐 Server Verification')
                     .setDescription(description)
                     .setColor(embedColor)
-                    .addFields(
-                        { name: '📋 What happens next?', value: 'After verification, you\'ll get the Verified role and access to the full server.', inline: false },
-                        { name: '❓ Need help?', value: 'If you have issues, contact a staff member.', inline: false }
-                    )
-                    .setFooter({ text: 'Click the button below to get started!' })
                     .setTimestamp();
 
                 const verifyButton = new ActionRowBuilder()
