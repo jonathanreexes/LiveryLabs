@@ -19,6 +19,10 @@ module.exports = {
                         .setDescription('Custom verification message')
                         .setRequired(false))
                 .addStringOption(option =>
+                    option.setName('title')
+                        .setDescription('Custom verification title')
+                        .setRequired(false))
+                .addStringOption(option =>
                     option.setName('color')
                         .setDescription('Border color: preset name (blue/green/red/purple/orange/yellow/pink) or hex code (#FF5733)')
                         .setRequired(false)))
@@ -64,6 +68,7 @@ module.exports = {
 
                 let verifiedRole = interaction.options.getRole('verified_role');
                 const customMessage = interaction.options.getString('message');
+                const customTitle = interaction.options.getString('title');
                 const colorChoice = interaction.options.getString('color');
                 const verificationChannel = interaction.channel;
 
@@ -121,20 +126,22 @@ module.exports = {
                     }
                 }
 
-                // Store verification settings including color
+                // Store verification settings including color and title
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color) 
-                     VALUES (?, 1, ?, ?, ?)`,
-                    [guildId, verifiedRole.id, verificationChannel.id, embedColor]
+                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title) 
+                     VALUES (?, 1, ?, ?, ?, ?)`,
+                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle]
                 );
 
                 // Create verification message
                 const defaultMessage = 'Welcome to our server! Please click the button below to verify yourself and gain access to all channels and features.';
+                const defaultTitle = '🔐 Server Verification';
                 const description = customMessage || defaultMessage;
+                const title = customTitle || defaultTitle;
                 
                 const verifyEmbed = new EmbedBuilder()
-                    .setTitle('🔐 Server Verification')
+                    .setTitle(title)
                     .setDescription(description)
                     .setColor(embedColor)
                     .setTimestamp();

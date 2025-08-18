@@ -60,6 +60,7 @@ class Database {
                 'ALTER TABLE guild_settings ADD COLUMN anti_spam INTEGER DEFAULT 0',
                 'ALTER TABLE guild_settings ADD COLUMN anti_nuke INTEGER DEFAULT 0',
                 'ALTER TABLE guild_settings ADD COLUMN verification_color INTEGER DEFAULT 5814770',
+                'ALTER TABLE guild_settings ADD COLUMN verification_title TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN updated_at TEXT DEFAULT (datetime("now"))'
             ];
 
