@@ -94,6 +94,10 @@ CREATE TABLE IF NOT EXISTS giveaways (
     end_time TEXT NOT NULL,
     requirements TEXT,
     active INTEGER DEFAULT 1,
+    custom_title TEXT,
+    custom_message TEXT,
+    banner_url TEXT,
+    embed_color INTEGER DEFAULT 16738484,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

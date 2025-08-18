@@ -34,6 +34,22 @@ module.exports = {
                 .addChannelOption(option =>
                     option.setName('channel')
                         .setDescription('Channel to host the giveaway (defaults to current)')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('title')
+                        .setDescription('Custom title for the giveaway (optional)')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('message')
+                        .setDescription('Custom message for the giveaway (optional)')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('banner')
+                        .setDescription('Banner image URL for the giveaway (optional)')
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('color')
+                        .setDescription('Hex color code for embed (e.g., #FF5733 or ff5733)')
                         .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
@@ -94,6 +110,10 @@ module.exports = {
         const winners = interaction.options.getInteger('winners') || 1;
         const requirements = interaction.options.getString('requirements');
         const channel = interaction.options.getChannel('channel') || interaction.channel;
+        const customTitle = interaction.options.getString('title');
+        const customMessage = interaction.options.getString('message');
+        const bannerUrl = interaction.options.getString('banner');
+        const colorInput = interaction.options.getString('color');
 
         // Validate channel type
         if (channel.type !== 0) { // 0 = GUILD_TEXT
@@ -114,17 +134,57 @@ module.exports = {
             });
         }
 
+        // Validate and parse color
+        let embedColor = 0xff69b4; // Default pink
+        if (colorInput) {
+            const cleanColor = colorInput.replace('#', '');
+            if (/^[0-9A-Fa-f]{6}$/.test(cleanColor)) {
+                embedColor = parseInt(cleanColor, 16);
+            } else {
+                return await interaction.reply({
+                    content: '❌ Invalid color format. Please use hex format like #FF5733 or FF5733.',
+                    ephemeral: true
+                });
+            }
+        }
+
+        // Validate banner URL if provided
+        if (bannerUrl && !this.isValidImageUrl(bannerUrl)) {
+            return await interaction.reply({
+                content: '❌ Invalid banner URL. Please provide a valid image URL (jpg, jpeg, png, gif, webp).',
+                ephemeral: true
+            });
+        }
+
         // Calculate end time
         const endTime = new Date(Date.now() + duration * 60 * 1000);
         const endTimestamp = Math.floor(endTime.getTime() / 1000);
 
+        // Build description
+        let description;
+        if (customMessage) {
+            description = customMessage;
+            description += `\n\n**Prize:** ${prize}`;
+            description += `\n**Winners:** ${winners}`;
+            description += `\n**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)`;
+            if (requirements) description += `\n**Requirements:** ${requirements}`;
+            description += `\n\n**How to enter:** Click the 🎉 button below!`;
+        } else {
+            description = `**Prize:** ${prize}\n\n**Winners:** ${winners}\n**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)${requirements ? `\n**Requirements:** ${requirements}` : ''}\n\n**How to enter:** Click the 🎉 button below!`;
+        }
+
         // Create giveaway embed
         const giveawayEmbed = new EmbedBuilder()
-            .setTitle('🎉 GIVEAWAY 🎉')
-            .setDescription(`**Prize:** ${prize}\n\n**Winners:** ${winners}\n**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)${requirements ? `\n**Requirements:** ${requirements}` : ''}\n\n**How to enter:** Click the 🎉 button below!`)
-            .setColor(0xff69b4)
+            .setTitle(customTitle || '🎉 GIVEAWAY 🎉')
+            .setDescription(description)
+            .setColor(embedColor)
             .setFooter({ text: `${winners} winner${winners > 1 ? 's' : ''} | Ends` })
             .setTimestamp(endTime);
+
+        // Add banner if provided
+        if (bannerUrl) {
+            giveawayEmbed.setImage(bannerUrl);
+        }
 
         // Create enter button
         const enterButton = new ActionRowBuilder()
@@ -142,11 +202,11 @@ module.exports = {
             components: [enterButton]
         });
 
-        // Store giveaway in database
+        // Store giveaway in database with customization data
         await database.run(
-            `INSERT INTO giveaways (message_id, guild_id, channel_id, host_id, prize, winners_count, end_time, requirements, active)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-            [giveawayMessage.id, interaction.guild.id, channel.id, interaction.user.id, prize, winners, endTime.toISOString(), requirements]
+            `INSERT INTO giveaways (message_id, guild_id, channel_id, host_id, prize, winners_count, end_time, requirements, active, custom_title, custom_message, banner_url, embed_color)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)`,
+            [giveawayMessage.id, interaction.guild.id, channel.id, interaction.user.id, prize, winners, endTime.toISOString(), requirements, customTitle, customMessage, bannerUrl, embedColor]
         );
 
         // Schedule giveaway end
@@ -316,12 +376,16 @@ module.exports = {
                 );
 
             if (entries.length === 0) {
-                // No entries
+                // No entries with custom styling
                 const noWinnerEmbed = new EmbedBuilder()
-                    .setTitle('🎉 Giveaway Ended')
+                    .setTitle(giveaway.custom_title ? giveaway.custom_title.replace('🎉', '🔒') : '🔒 Giveaway Ended')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner:** No valid entries\n\nBetter luck next time!`)
                     .setColor(0xff0000)
                     .setTimestamp();
+
+                if (giveaway.banner_url) {
+                    noWinnerEmbed.setImage(giveaway.banner_url);
+                }
 
                 await message.edit({ embeds: [noWinnerEmbed], components: [disabledButton] });
                 
@@ -331,27 +395,39 @@ module.exports = {
                     .setColor(0xff0000)
                     .setTimestamp();
 
+                if (giveaway.banner_url) {
+                    noWinnerAnnouncement.setImage(giveaway.banner_url);
+                }
+
                 await channel.send({ embeds: [noWinnerAnnouncement] });
             } else {
                 // Select winners
                 const winners = this.selectWinners(entries, giveaway.winners_count);
                 const winnerMentions = winners.map(winner => `<@${winner.user_id}>`).join(', ');
 
-                // Update original message
+                // Update original message with custom styling
                 const endedEmbed = new EmbedBuilder()
-                    .setTitle('🎉 Giveaway Ended')
+                    .setTitle(giveaway.custom_title ? giveaway.custom_title.replace('🎉', '🔒') : '🔒 Giveaway Ended')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner${winners.length > 1 ? 's' : ''}:** ${winnerMentions}\n\nCongratulations!`)
-                    .setColor(0x00ff00)
+                    .setColor(giveaway.embed_color || 0x00ff00)
                     .setTimestamp();
+
+                if (giveaway.banner_url) {
+                    endedEmbed.setImage(giveaway.banner_url);
+                }
 
                 await message.edit({ embeds: [endedEmbed], components: [disabledButton] });
 
-                // Announce winners
+                // Announce winners with custom styling
                 const winnerAnnouncement = new EmbedBuilder()
                     .setTitle('🎉 Giveaway Results')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner${winners.length > 1 ? 's' : ''}:** ${winnerMentions}\n\nCongratulations! Please contact the giveaway host to claim your prize.`)
-                    .setColor(0x00ff00)
+                    .setColor(giveaway.embed_color || 0x00ff00)
                     .setTimestamp();
+
+                if (giveaway.banner_url) {
+                    winnerAnnouncement.setImage(giveaway.banner_url);
+                }
 
                 await channel.send({ embeds: [winnerAnnouncement] });
             }
@@ -372,5 +448,15 @@ module.exports = {
     selectWinners(entries, count) {
         const shuffled = entries.sort(() => 0.5 - Math.random());
         return shuffled.slice(0, Math.min(count, entries.length));
+    },
+
+    isValidImageUrl(url) {
+        try {
+            const parsedUrl = new URL(url);
+            const pathname = parsedUrl.pathname.toLowerCase();
+            return pathname.match(/\.(jpg|jpeg|png|gif|webp)$/);
+        } catch {
+            return false;
+        }
     }
 };
