@@ -13,6 +13,7 @@ Preferred communication style: Simple, everyday language.
 - Using Dyno bot for heavy moderation and community management  
 - Livery Labs bot focused on: music, games, welcome/leave messages, verification, light anti-spam, and anti-nuke protection
 - Removed heavy moderation commands (kick, ban, warn) to avoid conflicts with other bots
+- Verification system successfully configured and tested (August 18, 2025)
 
 ## System Architecture
 
@@ -39,6 +40,7 @@ Preferred communication style: Simple, everyday language.
 - **Permission Levels**: Role-based access control with custom permission manager
 - **Rate Limiting**: Per-user command rate limiting to prevent abuse
 - **Bot Customization Commands**: Admin-only commands for changing bot avatar, banner, and name
+- **Verification System**: Admin-only `/verification setup` command with automatic role creation and button-based user verification
 
 ### Music System
 - **Discord.js Voice**: Native Discord voice connection handling
