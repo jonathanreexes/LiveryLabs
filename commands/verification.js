@@ -33,6 +33,10 @@ module.exports = {
                 .addStringOption(option =>
                     option.setName('color')
                         .setDescription('Border color: preset name (blue/green/red/purple/orange/yellow/pink) or hex code (#FF5733)')
+                        .setRequired(false))
+                .addAttachmentOption(option =>
+                    option.setName('image')
+                        .setDescription('Image to display in the verification embed')
                         .setRequired(false)))
         .addSubcommand(subcommand =>
             subcommand
@@ -80,6 +84,7 @@ module.exports = {
                 const successTitle = interaction.options.getString('success_title');
                 const successMessage = interaction.options.getString('success_message');
                 const colorChoice = interaction.options.getString('color');
+                const imageAttachment = interaction.options.getAttachment('image');
                 const verificationChannel = interaction.channel;
 
                 // Color processing - support both presets and hex codes
@@ -120,6 +125,22 @@ module.exports = {
                     }
                 }
 
+                // Validate image attachment if provided
+                let verificationImageUrl = null;
+                if (imageAttachment) {
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    const maxSize = 8 * 1024 * 1024; // 8MB
+                    
+                    if (!validTypes.includes(imageAttachment.contentType) || imageAttachment.size > maxSize) {
+                        return await interaction.reply({
+                            content: '❌ Invalid image file. Please upload a valid image (jpg, jpeg, png, gif, webp) under 8MB.',
+                            ephemeral: true
+                        });
+                    }
+                    
+                    verificationImageUrl = imageAttachment.url;
+                }
+
                 // Create verified role if not provided
                 if (!verifiedRole) {
                     try {
@@ -139,9 +160,9 @@ module.exports = {
                 // Store verification settings including all customizations
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title, success_title, success_message) 
-                     VALUES (?, 1, ?, ?, ?, ?, ?, ?)`,
-                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle, successTitle, successMessage]
+                     (guild_id, verification_enabled, verified_role_id, verification_channel_id, verification_color, verification_title, success_title, success_message, verification_image_url) 
+                     VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?)`,
+                    [guildId, verifiedRole.id, verificationChannel.id, embedColor, customTitle, successTitle, successMessage, verificationImageUrl]
                 );
 
                 // Create verification message
@@ -154,6 +175,11 @@ module.exports = {
                     .setTitle(title)
                     .setDescription(description)
                     .setColor(embedColor);
+
+                // Add image if provided
+                if (verificationImageUrl) {
+                    verifyEmbed.setImage(verificationImageUrl);
+                }
 
                 const verifyButton = new ActionRowBuilder()
                     .addComponents(

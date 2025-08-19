@@ -17,6 +17,7 @@ Preferred communication style: Simple, everyday language.
 - Complete verification customization implemented: custom titles, messages, success responses, and colors for full branding control
 - Timestamps removed from verification embeds for cleaner appearance (August 19, 2025)
 - Comprehensive giveaway system with full customization: custom titles, messages, banners, colors, and automated management
+- Image upload support for both verification embeds and custom embed command (August 19, 2025)
 - Detailed Discord role permissions guide created for multi-bot server setup and security best practices
 
 ## System Architecture

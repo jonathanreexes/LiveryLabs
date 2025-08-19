@@ -63,6 +63,7 @@ class Database {
                 'ALTER TABLE guild_settings ADD COLUMN verification_title TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN success_title TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN success_message TEXT',
+                'ALTER TABLE guild_settings ADD COLUMN verification_image_url TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN rules_channel_id TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN member_role_id TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN updated_at TEXT DEFAULT (datetime("now"))'
