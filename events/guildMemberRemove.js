@@ -1,34 +1,54 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const logger = require('../utils/logger');
-const config = require('../config.json');
+const database = require('../database/database');
 
 module.exports = {
     name: Events.GuildMemberRemove,
     async execute(member) {
         try {
-            // Find welcome/farewell channel
-            const farewellChannel = member.guild.channels.cache.find(
-                channel => channel.name === config.welcomeChannel
+            // Get leave settings from database
+            const settings = await database.get(
+                'SELECT * FROM guild_settings WHERE guild_id = ? AND leave_enabled = 1',
+                [member.guild.id]
             );
 
-            if (!farewellChannel) {
-                logger.warn(`Farewell channel '${config.welcomeChannel}' not found in ${member.guild.name}`);
+            if (!settings || !settings.welcome_channel_id) {
+                logger.debug(`Leave messages not configured or disabled in ${member.guild.name}`);
                 return;
             }
 
+            const farewellChannel = member.guild.channels.cache.get(settings.welcome_channel_id);
+            if (!farewellChannel) {
+                logger.warn(`Leave channel not found in ${member.guild.name}`);
+                return;
+            }
+
+            // Use custom settings or defaults
+            const leaveTitle = settings.leave_title || '👋 Goodbye!';
+            const leaveMessage = settings.leave_message || '{username} has left the server';
+            const leaveColor = settings.leave_color || 0xff6b6b;
+            const leaveImageUrl = settings.leave_image_url;
+
+            // Process message placeholders
+            const processedMessage = leaveMessage.replace('{username}', member.user.username);
+
             // Create farewell embed
             const farewellEmbed = new EmbedBuilder()
-                .setColor('#ff6b6b')
-                .setTitle('👋 Goodbye!')
-                .setDescription(`${member.user.username} has left the server`)
+                .setColor(leaveColor)
+                .setTitle(leaveTitle)
+                .setDescription(processedMessage)
                 .addFields(
                     { name: '👤 Member Count', value: `We now have ${member.guild.memberCount} members`, inline: true },
                     { name: '📅 Joined Server', value: member.joinedAt ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:R>` : 'Unknown', inline: true },
                     { name: '⏱️ Time in Server', value: member.joinedAt ? `${Math.floor((Date.now() - member.joinedTimestamp) / (1000 * 60 * 60 * 24))} days` : 'Unknown', inline: true }
                 )
                 .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-                .setFooter({ text: `ID: ${member.user.id}` })
-                .setTimestamp();
+                .setFooter({ text: `ID: ${member.user.id}` });
+
+            // Add custom image if configured
+            if (leaveImageUrl) {
+                farewellEmbed.setImage(leaveImageUrl);
+            }
 
             // Send farewell message
             await farewellChannel.send({ embeds: [farewellEmbed] });

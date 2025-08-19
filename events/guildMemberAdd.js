@@ -1,34 +1,56 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const logger = require('../utils/logger');
-const config = require('../config.json');
+const database = require('../database/database');
 
 module.exports = {
     name: Events.GuildMemberAdd,
     async execute(member) {
         try {
-            // Find welcome channel
-            const welcomeChannel = member.guild.channels.cache.find(
-                channel => channel.name === config.welcomeChannel
+            // Get welcome settings from database
+            const settings = await database.get(
+                'SELECT * FROM guild_settings WHERE guild_id = ? AND welcome_enabled = 1',
+                [member.guild.id]
             );
 
-            if (!welcomeChannel) {
-                logger.warn(`Welcome channel '${config.welcomeChannel}' not found in ${member.guild.name}`);
+            if (!settings || !settings.welcome_channel_id) {
+                logger.debug(`Welcome messages not configured or disabled in ${member.guild.name}`);
                 return;
             }
 
+            const welcomeChannel = member.guild.channels.cache.get(settings.welcome_channel_id);
+            if (!welcomeChannel) {
+                logger.warn(`Welcome channel not found in ${member.guild.name}`);
+                return;
+            }
+
+            // Use custom settings or defaults
+            const welcomeTitle = settings.welcome_title || '🎉 Welcome to the server!';
+            const welcomeMessage = settings.welcome_message || 'Welcome {user}, we\'re glad to have you here!';
+            const welcomeColor = settings.welcome_color || 0x00ff00;
+            const welcomeImageUrl = settings.welcome_image_url;
+
+            // Process message placeholders
+            const processedMessage = welcomeMessage
+                .replace('{user}', `${member}`)
+                .replace('{username}', member.user.username);
+
             // Create welcome embed
             const welcomeEmbed = new EmbedBuilder()
-                .setColor('#00ff00')
-                .setTitle('🎉 Welcome to the server!')
-                .setDescription(`Welcome ${member}, we're glad to have you here!`)
+                .setColor(welcomeColor)
+                .setTitle(welcomeTitle)
+                .setDescription(processedMessage)
                 .addFields(
                     { name: '👤 Member Count', value: `You are member #${member.guild.memberCount}`, inline: true },
                     { name: '📅 Account Created', value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
                     { name: '📋 Quick Tips', value: '• Read the server rules\n• Check out the channels\n• Say hello in chat!', inline: false }
                 )
                 .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
-                .setFooter({ text: `ID: ${member.user.id}` })
-                .setTimestamp();
+                .setFooter({ text: `ID: ${member.user.id}` });
+
+            // Add custom image if configured
+            if (welcomeImageUrl) {
+                welcomeEmbed.setImage(welcomeImageUrl);
+            }
 
             // Send welcome message
             await welcomeChannel.send({ 
