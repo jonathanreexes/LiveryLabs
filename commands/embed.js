@@ -121,7 +121,6 @@ module.exports = {
             }
 
             // Handle image attachment
-            let imageUrl = null;
             if (imageAttachment) {
                 // Validate image attachment
                 if (!this.isValidImageFile(imageAttachment)) {
@@ -131,25 +130,30 @@ module.exports = {
                 }
 
                 try {
-                    // Download and save the image temporarily
-                    const tempImagePath = await this.downloadImage(imageAttachment.url);
+                    // Use Discord's direct URL approach - no temp file needed
+                    const imageFileName = `embed_image_${randomUUID().slice(0, 8)}.${this.getFileExtension(imageAttachment.name)}`;
+                    
+                    // Download image data directly to buffer
+                    const imageResponse = await fetch(imageAttachment.url);
+                    if (!imageResponse.ok) {
+                        throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+                    }
+                    
+                    const imageBuffer = await imageResponse.arrayBuffer();
                     
                     // Create attachment for Discord
-                    const imageAttachmentBuilder = new AttachmentBuilder(tempImagePath, { 
-                        name: `embed_image_${randomUUID().slice(0, 8)}.${this.getFileExtension(imageAttachment.name)}` 
+                    const imageAttachmentBuilder = new AttachmentBuilder(Buffer.from(imageBuffer), { 
+                        name: imageFileName 
                     });
 
                     // Set image in embed
-                    embed.setImage(`attachment://${imageAttachmentBuilder.name}`);
+                    embed.setImage(`attachment://${imageFileName}`);
 
                     // Send embed with attached image
                     const embedMessage = await targetChannel.send({ 
                         embeds: [embed], 
                         files: [imageAttachmentBuilder] 
                     });
-
-                    // Clean up temporary file
-                    fs.unlinkSync(tempImagePath);
 
                     await interaction.editReply({
                         content: `✅ Custom embed sent successfully to ${targetChannel}!\n\n[View Message](${embedMessage.url})`
@@ -161,7 +165,7 @@ module.exports = {
                 } catch (error) {
                     logger.error('Error processing image attachment:', error);
                     return await interaction.editReply({
-                        content: '❌ Failed to process the image attachment. Please try again.'
+                        content: `❌ Failed to process the image attachment. Error: ${error.message}`
                     });
                 }
             }
@@ -209,41 +213,5 @@ module.exports = {
         return filename.split('.').pop().toLowerCase();
     },
 
-    async downloadImage(url) {
-        return new Promise((resolve, reject) => {
-            const tempDir = path.join(__dirname, '..', 'temp');
-            
-            // Create temp directory if it doesn't exist
-            if (!fs.existsSync(tempDir)) {
-                fs.mkdirSync(tempDir, { recursive: true });
-            }
 
-            const tempFileName = `temp_image_${randomUUID()}.tmp`;
-            const tempFilePath = path.join(tempDir, tempFileName);
-            const file = fs.createWriteStream(tempFilePath);
-
-            const protocol = url.startsWith('https') ? https : http;
-
-            protocol.get(url, (response) => {
-                if (response.statusCode !== 200) {
-                    reject(new Error(`HTTP ${response.statusCode}`));
-                    return;
-                }
-
-                response.pipe(file);
-
-                file.on('finish', () => {
-                    file.close();
-                    resolve(tempFilePath);
-                });
-
-                file.on('error', (err) => {
-                    fs.unlink(tempFilePath, () => {}); // Clean up on error
-                    reject(err);
-                });
-            }).on('error', (err) => {
-                reject(err);
-            });
-        });
-    }
 };
