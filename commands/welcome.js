@@ -48,10 +48,28 @@ module.exports = {
                     option.setName('welcome_image')
                         .setDescription('Image to display in welcome embeds')
                         .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('welcome_image_position')
+                        .setDescription('Where to place welcome image')
+                        .setRequired(false)
+                        .addChoices(
+                            { name: 'Top (Thumbnail)', value: 'thumbnail' },
+                            { name: 'Bottom (Large Image)', value: 'image' },
+                            { name: 'Author Icon', value: 'author' }
+                        ))
                 .addAttachmentOption(option =>
                     option.setName('leave_image')
                         .setDescription('Image to display in leave embeds')
-                        .setRequired(false)))
+                        .setRequired(false))
+                .addStringOption(option =>
+                    option.setName('leave_image_position')
+                        .setDescription('Where to place leave image')
+                        .setRequired(false)
+                        .addChoices(
+                            { name: 'Top (Thumbnail)', value: 'thumbnail' },
+                            { name: 'Bottom (Large Image)', value: 'image' },
+                            { name: 'Author Icon', value: 'author' }
+                        )))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('toggle')
