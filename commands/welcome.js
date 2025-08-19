@@ -11,9 +11,14 @@ module.exports = {
                 .setName('setup')
                 .setDescription('Set up welcome and leave messages')
                 .addChannelOption(option =>
-                    option.setName('channel')
-                        .setDescription('Channel for welcome/leave messages')
+                    option.setName('welcome_channel')
+                        .setDescription('Channel for welcome messages')
                         .setRequired(true)
+                        .addChannelTypes(ChannelType.GuildText))
+                .addChannelOption(option =>
+                    option.setName('leave_channel')
+                        .setDescription('Channel for leave messages (optional - uses welcome channel if not set)')
+                        .setRequired(false)
                         .addChannelTypes(ChannelType.GuildText))
                 .addStringOption(option =>
                     option.setName('welcome_title')
@@ -92,15 +97,16 @@ module.exports = {
 
         try {
             if (subcommand === 'setup') {
-                // Check if user is server owner or has admin perms
-                if (interaction.user.id !== interaction.guild.ownerId && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+                // Check if user is server owner
+                if (interaction.user.id !== interaction.guild.ownerId) {
                     return await interaction.reply({ 
-                        content: '❌ Only the server owner or administrators can customize welcome/leave settings!', 
+                        content: '❌ Only the server owner can customize welcome/leave settings!', 
                         ephemeral: true 
                     });
                 }
 
-                const channel = interaction.options.getChannel('channel');
+                const welcomeChannel = interaction.options.getChannel('welcome_channel');
+                const leaveChannel = interaction.options.getChannel('leave_channel') || welcomeChannel;
                 const welcomeTitle = interaction.options.getString('welcome_title');
                 const welcomeMessage = interaction.options.getString('welcome_message');
                 const leaveTitle = interaction.options.getString('leave_title');
@@ -165,17 +171,19 @@ module.exports = {
                 // Store settings in database
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, welcome_enabled, leave_enabled, welcome_channel_id, welcome_title, welcome_message, leave_title, leave_message, welcome_color, leave_color, welcome_image_url, leave_image_url) 
-                     VALUES (?, 1, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [guildId, channel.id, welcomeTitle, welcomeMessage, leaveTitle, leaveMessage, welcomeColor, leaveColor, welcomeImageUrl, leaveImageUrl]
+                     (guild_id, welcome_enabled, leave_enabled, welcome_channel_id, leave_channel_id, welcome_title, welcome_message, leave_title, leave_message, welcome_color, leave_color, welcome_image_url, leave_image_url) 
+                     VALUES (?, 1, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [guildId, welcomeChannel.id, leaveChannel.id, welcomeTitle, welcomeMessage, leaveTitle, leaveMessage, welcomeColor, leaveColor, welcomeImageUrl, leaveImageUrl]
                 );
 
                 const embed = new EmbedBuilder()
                     .setTitle('✅ Welcome/Leave Messages Configured')
-                    .setDescription(`Welcome and leave messages have been set up in ${channel}!`)
+                    .setDescription(`Welcome and leave messages have been configured!`)
                     .addFields(
-                        { name: '📥 Welcome Title', value: welcomeTitle || 'Default: 🎉 Welcome to the server!', inline: true },
-                        { name: '📤 Leave Title', value: leaveTitle || 'Default: 👋 Goodbye!', inline: true },
+                        { name: '📥 Welcome Channel', value: `${welcomeChannel}`, inline: true },
+                        { name: '📤 Leave Channel', value: `${leaveChannel}`, inline: true },
+                        { name: '📝 Welcome Title', value: welcomeTitle || 'Default: 🎉 Welcome to the server!', inline: true },
+                        { name: '📝 Leave Title', value: leaveTitle || 'Default: 👋 Goodbye!', inline: true },
                         { name: '🎨 Colors', value: `Welcome: #${welcomeColor.toString(16).padStart(6, '0')}\nLeave: #${leaveColor.toString(16).padStart(6, '0')}`, inline: false },
                         { name: '🖼️ Images', value: `Welcome: ${welcomeImageUrl ? '✅ Custom' : '❌ None'}\nLeave: ${leaveImageUrl ? '✅ Custom' : '❌ None'}`, inline: true }
                     )
@@ -234,12 +242,14 @@ module.exports = {
                 if (!settings) {
                     embed.setDescription('❌ Welcome/leave messages are not configured. Use `/welcome setup` to get started.');
                 } else {
-                    const channel = interaction.guild.channels.cache.get(settings.welcome_channel_id);
+                    const welcomeChannel = interaction.guild.channels.cache.get(settings.welcome_channel_id);
+                    const leaveChannel = interaction.guild.channels.cache.get(settings.leave_channel_id || settings.welcome_channel_id);
                     embed.setDescription('Current welcome/leave message settings:')
                         .addFields(
                             { name: '📥 Welcome Messages', value: settings.welcome_enabled ? '✅ Enabled' : '❌ Disabled', inline: true },
                             { name: '📤 Leave Messages', value: settings.leave_enabled ? '✅ Enabled' : '❌ Disabled', inline: true },
-                            { name: '📺 Channel', value: channel ? `${channel}` : '❌ Not set', inline: true },
+                            { name: '📺 Welcome Channel', value: welcomeChannel ? `${welcomeChannel}` : '❌ Not set', inline: true },
+                            { name: '📺 Leave Channel', value: leaveChannel ? `${leaveChannel}` : '❌ Not set', inline: true },
                             { name: '🎨 Welcome Color', value: settings.welcome_color ? `#${settings.welcome_color.toString(16).padStart(6, '0')}` : 'Default', inline: true },
                             { name: '🎨 Leave Color', value: settings.leave_color ? `#${settings.leave_color.toString(16).padStart(6, '0')}` : 'Default', inline: true },
                             { name: '🖼️ Images', value: `Welcome: ${settings.welcome_image_url ? '✅' : '❌'} | Leave: ${settings.leave_image_url ? '✅' : '❌'}`, inline: true }

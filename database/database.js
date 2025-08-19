@@ -67,6 +67,7 @@ class Database {
                 'ALTER TABLE guild_settings ADD COLUMN welcome_enabled INTEGER DEFAULT 0',
                 'ALTER TABLE guild_settings ADD COLUMN leave_enabled INTEGER DEFAULT 0',
                 'ALTER TABLE guild_settings ADD COLUMN welcome_channel_id TEXT',
+                'ALTER TABLE guild_settings ADD COLUMN leave_channel_id TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN welcome_title TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN welcome_message TEXT',
                 'ALTER TABLE guild_settings ADD COLUMN leave_title TEXT',

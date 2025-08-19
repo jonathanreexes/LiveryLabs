@@ -12,12 +12,19 @@ module.exports = {
                 [member.guild.id]
             );
 
-            if (!settings || !settings.welcome_channel_id) {
+            if (!settings) {
                 logger.debug(`Leave messages not configured or disabled in ${member.guild.name}`);
                 return;
             }
 
-            const farewellChannel = member.guild.channels.cache.get(settings.welcome_channel_id);
+            // Use separate leave channel if configured, otherwise fallback to welcome channel
+            const leaveChannelId = settings.leave_channel_id || settings.welcome_channel_id;
+            if (!leaveChannelId) {
+                logger.debug(`No leave channel configured in ${member.guild.name}`);
+                return;
+            }
+
+            const farewellChannel = member.guild.channels.cache.get(leaveChannelId);
             if (!farewellChannel) {
                 logger.warn(`Leave channel not found in ${member.guild.name}`);
                 return;
