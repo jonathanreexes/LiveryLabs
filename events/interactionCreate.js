@@ -192,8 +192,7 @@ async function handleVerification(interaction) {
         const embed = new EmbedBuilder()
             .setTitle(settings.success_title || defaultSuccessTitle)
             .setDescription(settings.success_message || defaultSuccessMessage)
-            .setColor(verificationColor)
-            .setTimestamp();
+            .setColor(verificationColor);
 
         await interaction.reply({ embeds: [embed], ephemeral: true });
         

@@ -172,8 +172,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('✅ Verification Setup Complete')
                     .setDescription(`Single-step verification system configured!\n\n**Verified Role:** ${verifiedRole}\n**Channel:** ${verificationChannel}\n\n*New users will click verify and gain immediate access to your server.*`)
-                    .setColor(0x00ff00)
-                    .setTimestamp();
+                    .setColor(0x00ff00);
 
                 await interaction.reply({ embeds: [embed] });
                 logger.info(`Verification setup completed in guild ${guildId}`);
@@ -191,8 +190,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('🔐 Verification System')
                     .setDescription(`Verification has been **${enabled ? 'enabled' : 'disabled'}**`)
-                    .setColor(enabled ? 0x00ff00 : 0xff0000)
-                    .setTimestamp();
+                    .setColor(enabled ? 0x00ff00 : 0xff0000);
 
                 await interaction.reply({ embeds: [embed] });
 
@@ -220,8 +218,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('✅ User Verified')
                     .setDescription(`${user} has been manually verified and given the ${verifiedRole} role.`)
-                    .setColor(0x00ff00)
-                    .setTimestamp();
+                    .setColor(0x00ff00);
 
                 await interaction.reply({ embeds: [embed] });
                 logger.info(`User ${user.tag} manually verified in guild ${guildId}`);
@@ -251,8 +248,7 @@ module.exports = {
                             inline: true 
                         }
                     )
-                    .setColor(0x3498db)
-                    .setTimestamp();
+                    .setColor(0x3498db);
 
                 await interaction.reply({ embeds: [embed] });
             }
