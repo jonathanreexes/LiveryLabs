@@ -35,6 +35,7 @@ module.exports = {
             const leaveMessage = settings.leave_message || '{username} has left the server';
             const leaveColor = settings.leave_color || 0xff6b6b;
             const leaveImageUrl = settings.leave_image_url;
+            const leaveImagePosition = settings.leave_image_position || 'image';
 
             // Process message placeholders
             const processedMessage = leaveMessage.replace('{username}', member.user.username);
@@ -54,7 +55,26 @@ module.exports = {
 
             // Add custom image if configured
             if (leaveImageUrl) {
-                farewellEmbed.setImage(leaveImageUrl);
+                switch (leaveImagePosition) {
+                    case 'thumbnail':
+                        farewellEmbed.setThumbnail(leaveImageUrl);
+                        // Move user avatar to author icon
+                        farewellEmbed.setAuthor({ 
+                            name: member.user.username, 
+                            iconURL: member.user.displayAvatarURL({ dynamic: true }) 
+                        });
+                        break;
+                    case 'author':
+                        farewellEmbed.setAuthor({ 
+                            name: member.user.username, 
+                            iconURL: leaveImageUrl 
+                        });
+                        break;
+                    case 'image':
+                    default:
+                        farewellEmbed.setImage(leaveImageUrl);
+                        break;
+                }
             }
 
             // Send farewell message

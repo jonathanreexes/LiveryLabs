@@ -28,6 +28,7 @@ module.exports = {
             const welcomeMessage = settings.welcome_message || 'Welcome {user}, we\'re glad to have you here!';
             const welcomeColor = settings.welcome_color || 0x00ff00;
             const welcomeImageUrl = settings.welcome_image_url;
+            const welcomeImagePosition = settings.welcome_image_position || 'image';
 
             // Process message placeholders
             const processedMessage = welcomeMessage
@@ -49,7 +50,26 @@ module.exports = {
 
             // Add custom image if configured
             if (welcomeImageUrl) {
-                welcomeEmbed.setImage(welcomeImageUrl);
+                switch (welcomeImagePosition) {
+                    case 'thumbnail':
+                        welcomeEmbed.setThumbnail(welcomeImageUrl);
+                        // Move user avatar to author icon
+                        welcomeEmbed.setAuthor({ 
+                            name: member.user.username, 
+                            iconURL: member.user.displayAvatarURL({ dynamic: true }) 
+                        });
+                        break;
+                    case 'author':
+                        welcomeEmbed.setAuthor({ 
+                            name: member.user.username, 
+                            iconURL: welcomeImageUrl 
+                        });
+                        break;
+                    case 'image':
+                    default:
+                        welcomeEmbed.setImage(welcomeImageUrl);
+                        break;
+                }
             }
 
             // Send welcome message

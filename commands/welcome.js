@@ -132,7 +132,9 @@ module.exports = {
                 const welcomeColorChoice = interaction.options.getString('welcome_color');
                 const leaveColorChoice = interaction.options.getString('leave_color');
                 const welcomeImage = interaction.options.getAttachment('welcome_image');
+                const welcomeImagePosition = interaction.options.getString('welcome_image_position') || 'image';
                 const leaveImage = interaction.options.getAttachment('leave_image');
+                const leaveImagePosition = interaction.options.getString('leave_image_position') || 'image';
 
                 // Process colors
                 let welcomeColor = 0x00ff00; // Default green
@@ -189,9 +191,9 @@ module.exports = {
                 // Store settings in database
                 await database.run(
                     `INSERT OR REPLACE INTO guild_settings 
-                     (guild_id, welcome_enabled, leave_enabled, welcome_channel_id, leave_channel_id, welcome_title, welcome_message, leave_title, leave_message, welcome_color, leave_color, welcome_image_url, leave_image_url) 
-                     VALUES (?, 1, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [guildId, welcomeChannel.id, leaveChannel.id, welcomeTitle, welcomeMessage, leaveTitle, leaveMessage, welcomeColor, leaveColor, welcomeImageUrl, leaveImageUrl]
+                     (guild_id, welcome_enabled, leave_enabled, welcome_channel_id, leave_channel_id, welcome_title, welcome_message, leave_title, leave_message, welcome_color, leave_color, welcome_image_url, leave_image_url, welcome_image_position, leave_image_position) 
+                     VALUES (?, 1, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [guildId, welcomeChannel.id, leaveChannel.id, welcomeTitle, welcomeMessage, leaveTitle, leaveMessage, welcomeColor, leaveColor, welcomeImageUrl, leaveImageUrl, welcomeImagePosition, leaveImagePosition]
                 );
 
                 const embed = new EmbedBuilder()
