@@ -117,7 +117,7 @@ module.exports = {
                         inline: false
                     }
                 ])
-                .setColor(action === 'grant' ? 0x00ff00 : 0xff0000)
+                .setColor(0xD3D3D3)
                 .setTimestamp();
 
             await interaction.editReply({ embeds: [embed] });
@@ -174,7 +174,7 @@ module.exports = {
                         inline: true
                     }
                 ])
-                .setColor(0x5865f2)
+                .setColor(0xD3D3D3)
                 .setTimestamp();
 
             await interaction.editReply({ embeds: [embed] });
@@ -228,7 +228,7 @@ module.exports = {
                         inline: false
                     }
                 ])
-                .setColor(0x00ff00)
+                .setColor(0xD3D3D3)
                 .setTimestamp();
 
             await interaction.editReply({ embeds: [embed] });

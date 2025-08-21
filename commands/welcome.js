@@ -129,8 +129,8 @@ module.exports = {
                 const leaveImagePosition = interaction.options.getString('leave_image_position') || 'image';
 
                 // Process colors
-                let welcomeColor = 0x00ff00; // Default green
-                let leaveColor = 0xff6b6b; // Default red
+                let welcomeColor = 0xD3D3D3; // Default light gray
+                let leaveColor = 0xD3D3D3; // Default light gray
 
                 if (welcomeColorChoice) {
                     const processedColor = processColor(welcomeColorChoice);

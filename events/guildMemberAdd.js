@@ -27,7 +27,7 @@ module.exports = {
             // Use custom settings or defaults
             const welcomeTitle = settings.welcome_title || '🎉 Welcome to the server!';
             const welcomeMessage = settings.welcome_message || 'Welcome {user}, we\'re glad to have you here!';
-            const welcomeColor = settings.welcome_color || 0x00ff00;
+            const welcomeColor = settings.welcome_color || 0xD3D3D3;
             const welcomeImageUrl = settings.welcome_image_url;
             const welcomeImagePosition = settings.welcome_image_position || 'image';
 

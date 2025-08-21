@@ -81,7 +81,7 @@ module.exports = {
                 const verificationChannel = interaction.channel;
 
                 // Color processing - support both presets and hex codes
-                let embedColor = 0x5865F2; // Default Discord blue
+                let embedColor = 0xD3D3D3; // Default light gray
                 
                 if (colorChoice) {
                     // Check if it's a hex color code
@@ -104,7 +104,8 @@ module.exports = {
                             'purple': 0x9B59B6,    // Purple
                             'orange': 0xE67E22,    // Orange
                             'yellow': 0xF1C40F,    // Yellow
-                            'pink': 0xE91E63       // Pink
+                            'pink': 0xE91E63,      // Pink
+                            'gray': 0xD3D3D3       // Light gray
                         };
                         
                         if (colors[colorChoice.toLowerCase()]) {

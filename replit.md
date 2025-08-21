@@ -22,6 +22,7 @@ Preferred communication style: Simple, everyday language.
 - Professional bullet point formatting with hanging indents using • notation for clean bulletin-style lists (August 21, 2025)
 - Centralized owner-only security system implemented for ALL current and future commands (August 21, 2025)
 - Role-based command visibility system: certain roles can see commands but only owner can execute them (August 21, 2025)
+- Default embed colors standardized to light gray (0xD3D3D3) across all bot messages for consistent branding (August 21, 2025)
 - Comprehensive welcome and leave message system with separate channel configuration: welcome messages in public channels, leave messages in private bot channels, owner-only management (August 19, 2025)
 - Detailed Discord role permissions guide created for multi-bot server setup and security best practices
 

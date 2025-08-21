@@ -111,7 +111,7 @@ async function handle8Ball(interaction) {
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     
     const embed = new EmbedBuilder()
-        .setColor('#8b5cf6')
+        .setColor(0xD3D3D3)
         .setTitle('🎱 Magic 8-Ball')
         .addFields(
             { name: 'Question', value: question, inline: false },
@@ -137,7 +137,7 @@ async function handleDice(interaction) {
     }
     
     const embed = new EmbedBuilder()
-        .setColor('#f59e0b')
+        .setColor(0xD3D3D3)
         .setTitle('🎲 Dice Roll')
         .addFields(
             { name: 'Dice', value: `${count}d${sides}`, inline: true },
@@ -155,7 +155,7 @@ async function handleCoinFlip(interaction) {
     const emoji = result === 'Heads' ? '🟡' : '⚪';
     
     const embed = new EmbedBuilder()
-        .setColor('#10b981')
+        .setColor(0xD3D3D3)
         .setTitle('🪙 Coin Flip')
         .setDescription(`${emoji} **${result}**`)
         .setFooter({ text: `Flipped by ${interaction.user.username}` })
@@ -189,7 +189,7 @@ async function handleRockPaperScissors(interaction) {
     }
     
     const embed = new EmbedBuilder()
-        .setColor('#ef4444')
+        .setColor(0xD3D3D3)
         .setTitle('✂️ Rock Paper Scissors')
         .addFields(
             { name: 'Your Choice', value: `${emojis[userChoice]} ${userChoice}`, inline: true },
@@ -248,7 +248,7 @@ async function handleTrivia(interaction) {
     const row = new ActionRowBuilder().addComponents(buttons);
     
     const embed = new EmbedBuilder()
-        .setColor('#3b82f6')
+        .setColor(0xD3D3D3)
         .setTitle('🧠 Trivia Question')
         .setDescription(randomQuestion.question)
         .setFooter({ text: 'You have 30 seconds to answer!' })
@@ -265,7 +265,7 @@ async function handleTrivia(interaction) {
         const isCorrect = selectedIndex === randomQuestion.correct;
         
         const resultEmbed = new EmbedBuilder()
-            .setColor(isCorrect ? '#10b981' : '#ef4444')
+            .setColor(0xD3D3D3)
             .setTitle(isCorrect ? '✅ Correct!' : '❌ Incorrect!')
             .setDescription(`The correct answer was: **${randomQuestion.answer}**`)
             .setFooter({ text: `Answered by ${interaction.user.username}` })
@@ -274,7 +274,7 @@ async function handleTrivia(interaction) {
         await buttonInteraction.update({ embeds: [resultEmbed], components: [] });
     } catch (error) {
         const timeoutEmbed = new EmbedBuilder()
-            .setColor('#ef4444')
+            .setColor(0xD3D3D3)
             .setTitle('⏰ Time\'s up!')
             .setDescription(`The correct answer was: **${randomQuestion.answer}**`)
             .setTimestamp();
@@ -310,7 +310,7 @@ async function handleRiddle(interaction) {
     const randomRiddle = riddles[Math.floor(Math.random() * riddles.length)];
     
     const embed = new EmbedBuilder()
-        .setColor('#8b5cf6')
+        .setColor(0xD3D3D3)
         .setTitle('🤔 Riddle')
         .setDescription(randomRiddle.question)
         .setFooter({ text: 'Think you know the answer? Reply with your guess!' })
@@ -326,7 +326,7 @@ async function handleRiddle(interaction) {
     setTimeout(async () => {
         try {
             const revealEmbed = new EmbedBuilder()
-                .setColor('#10b981')
+                .setColor(0xD3D3D3)
                 .setTitle('💡 Riddle Answer')
                 .setDescription(`**${randomRiddle.answer}**`)
                 .setTimestamp();
@@ -355,7 +355,7 @@ async function handleJoke(interaction) {
     const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
     
     const embed = new EmbedBuilder()
-        .setColor('#f59e0b')
+        .setColor(0xD3D3D3)
         .setTitle('😂 Random Joke')
         .setDescription(randomJoke)
         .setFooter({ text: `Requested by ${interaction.user.username}` })

@@ -34,7 +34,7 @@ module.exports = {
             // Use custom settings or defaults
             const leaveTitle = settings.leave_title || '👋 Goodbye!';
             const leaveMessage = settings.leave_message || '{username} has left the server';
-            const leaveColor = settings.leave_color || 0xff6b6b;
+            const leaveColor = settings.leave_color || 0xD3D3D3;
             const leaveImageUrl = settings.leave_image_url;
             const leaveImagePosition = settings.leave_image_position || 'image';
 

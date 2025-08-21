@@ -75,7 +75,7 @@ module.exports = {
             }
 
             // Validate and parse color
-            let embedColor = 0x5865F2; // Default Discord blue
+            let embedColor = 0xD3D3D3; // Default light gray
             if (colorInput) {
                 const cleanColor = colorInput.replace('#', '');
                 if (/^[0-9A-Fa-f]{6}$/.test(cleanColor)) {

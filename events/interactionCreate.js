@@ -199,8 +199,8 @@ async function handleVerification(interaction) {
         // Add verified role
         await member.roles.add(verifiedRole);
 
-        // Use stored verification color or default to green
-        const verificationColor = settings.verification_color || 0x00ff00;
+        // Use stored verification color or default to light gray
+        const verificationColor = settings.verification_color || 0xD3D3D3;
         const defaultSuccessTitle = '✅ Verification Successful';
         const defaultSuccessMessage = 'Welcome to the server! You have been verified and can now access all channels.';
         
