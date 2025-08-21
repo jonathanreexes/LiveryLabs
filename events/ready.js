@@ -30,10 +30,22 @@ module.exports = {
                 }
             });
 
+            // Clear global commands first to prevent duplicates
+            try {
+                await client.application.commands.set([]);
+                logger.info('Cleared global commands to prevent duplicates');
+            } catch (error) {
+                logger.warn('Could not clear global commands:', error.message);
+            }
+
             // Register commands to each guild for better permission control
             for (const guild of client.guilds.cache.values()) {
-                await guild.commands.set(commands);
-                logger.info(`Commands registered for guild: ${guild.name}`);
+                try {
+                    await guild.commands.set(commands);
+                    logger.info(`Commands registered for guild: ${guild.name}`);
+                } catch (error) {
+                    logger.error(`Failed to register commands for guild ${guild.name}:`, error);
+                }
             }
             
             logger.info(`Successfully reloaded ${commands.length} application (/) commands.`);
