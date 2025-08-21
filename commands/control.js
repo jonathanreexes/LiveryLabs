@@ -97,7 +97,7 @@ module.exports = {
                                 inline: false
                             }
                         ],
-                        color: global.botSleeping ? 0x808080 : 0x00ff00,
+                        color: 0xD3D3D3,
                         timestamp: new Date().toISOString()
                     };
 
