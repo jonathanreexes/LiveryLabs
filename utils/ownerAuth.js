@@ -21,8 +21,15 @@ class OwnerAuth {
      */
     static async validateOwnerAccess(interaction) {
         if (!this.isOwner(interaction)) {
+            // Check if user has permission to see commands but can't execute
+            const canSeeCommands = this.canSeeCommands(interaction);
+            
+            const message = canSeeCommands 
+                ? '🔒 You can see this command but only the server owner can execute it.'
+                : '❌ This command can only be used by the server owner.';
+            
             await interaction.reply({
-                content: '❌ This command can only be used by the server owner.',
+                content: message,
                 ephemeral: true
             });
             
@@ -30,6 +37,34 @@ class OwnerAuth {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Check if user has roles that allow them to see commands
+     * @param {Object} interaction - Discord interaction object
+     * @returns {boolean} - True if user can see commands
+     */
+    static canSeeCommands(interaction) {
+        const member = interaction.member;
+        if (!member) return false;
+
+        // Roles that can see commands (but not execute them)
+        const allowedRoleNames = [
+            'Administrator',
+            'Admin', 
+            'Moderator',
+            'Mod',
+            'Staff',
+            'Helper',
+            'Bot Manager',
+            'Server Manager'
+        ];
+
+        return member.roles.cache.some(role => 
+            allowedRoleNames.some(allowedName => 
+                role.name.toLowerCase().includes(allowedName.toLowerCase())
+            )
+        );
     }
 
     /**

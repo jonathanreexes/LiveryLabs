@@ -30,8 +30,11 @@ module.exports = {
                 }
             });
 
-            // Register commands globally
-            await client.application.commands.set(commands);
+            // Register commands to each guild for better permission control
+            for (const guild of client.guilds.cache.values()) {
+                await guild.commands.set(commands);
+                logger.info(`Commands registered for guild: ${guild.name}`);
+            }
             
             logger.info(`Successfully reloaded ${commands.length} application (/) commands.`);
         } catch (error) {
