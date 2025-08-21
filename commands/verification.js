@@ -71,14 +71,6 @@ module.exports = {
 
         try {
             if (subcommand === 'setup') {
-                // Check if user is server owner
-                if (interaction.user.id !== interaction.guild.ownerId) {
-                    return await interaction.reply({ 
-                        content: '❌ Only the server owner can customize verification settings!', 
-                        ephemeral: true 
-                    });
-                }
-
                 let verifiedRole = interaction.options.getRole('verified_role');
                 const customMessage = interaction.options.getString('message');
                 const customTitle = interaction.options.getString('title');
@@ -205,14 +197,6 @@ module.exports = {
                 logger.info(`Verification setup completed in guild ${guildId}`);
 
             } else if (subcommand === 'toggle') {
-                // Check if user is server owner
-                if (interaction.user.id !== interaction.guild.ownerId) {
-                    return await interaction.reply({ 
-                        content: '❌ Only the server owner can toggle verification settings!', 
-                        ephemeral: true 
-                    });
-                }
-
                 const action = interaction.options.getString('action');
                 const enabled = action === 'enable';
 
@@ -230,14 +214,6 @@ module.exports = {
                 await interaction.reply({ embeds: [embed] });
 
             } else if (subcommand === 'verify') {
-                // Check if user is server owner
-                if (interaction.user.id !== interaction.guild.ownerId) {
-                    return await interaction.reply({ 
-                        content: '❌ Only the server owner can manually verify users!', 
-                        ephemeral: true 
-                    });
-                }
-
                 const user = interaction.options.getUser('user');
                 const member = await interaction.guild.members.fetch(user.id);
 

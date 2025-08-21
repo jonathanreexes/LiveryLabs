@@ -46,14 +46,6 @@ module.exports = {
 
     async execute(interaction) {
         try {
-            // Check if user is server owner
-            if (interaction.user.id !== interaction.guild.ownerId) {
-                return await interaction.reply({
-                    content: '❌ This command can only be used by the server owner.',
-                    ephemeral: true
-                });
-            }
-
             await interaction.deferReply({ ephemeral: true });
 
             const title = interaction.options.getString('title');

@@ -3,6 +3,7 @@ const logger = require('../utils/logger');
 const rateLimiter = require('../utils/rateLimiter');
 const database = require('../database/database');
 const { formatMessage } = require('../utils/messageFormatter');
+const OwnerAuth = require('../utils/ownerAuth');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -28,8 +29,13 @@ module.exports = {
 };
 
 async function handleSlashCommand(interaction) {
+    // Global owner-only validation for ALL commands
+    if (!await OwnerAuth.validateOwnerAccess(interaction)) {
+        return; // Already replied with error message
+    }
+
     // If bot is sleeping, ignore all commands except from owner
-    if (global.botSleeping && interaction.user.id !== interaction.guild.ownerId) {
+    if (global.botSleeping && !OwnerAuth.isOwner(interaction)) {
         return await interaction.reply({
             content: '💤 Bot is currently sleeping. Ask the server owner to wake it up.',
             ephemeral: true

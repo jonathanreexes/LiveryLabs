@@ -115,14 +115,6 @@ module.exports = {
 
         try {
             if (subcommand === 'setup') {
-                // Check if user is server owner
-                if (interaction.user.id !== interaction.guild.ownerId) {
-                    return await interaction.reply({ 
-                        content: '❌ Only the server owner can customize welcome/leave settings!', 
-                        ephemeral: true 
-                    });
-                }
-
                 const welcomeChannel = interaction.options.getChannel('welcome_channel');
                 const leaveChannel = interaction.options.getChannel('leave_channel') || welcomeChannel;
                 const welcomeTitle = interaction.options.getString('welcome_title');
@@ -213,14 +205,6 @@ module.exports = {
                 logger.info(`Welcome/leave messages configured in guild ${guildId} by ${interaction.user.tag}`);
 
             } else if (subcommand === 'toggle') {
-                // Check if user is server owner
-                if (interaction.user.id !== interaction.guild.ownerId) {
-                    return await interaction.reply({ 
-                        content: '❌ Only the server owner can toggle welcome/leave settings!', 
-                        ephemeral: true 
-                    });
-                }
-
                 const feature = interaction.options.getString('feature');
                 const action = interaction.options.getString('action');
                 const enabled = action === 'enable';
@@ -249,14 +233,6 @@ module.exports = {
                 await interaction.reply({ embeds: [embed] });
 
             } else if (subcommand === 'test') {
-                // Check if user is server owner
-                if (interaction.user.id !== interaction.guild.ownerId) {
-                    return await interaction.reply({ 
-                        content: '❌ Only the server owner can test welcome/leave messages!', 
-                        ephemeral: true 
-                    });
-                }
-
                 const type = interaction.options.getString('type');
                 
                 if (type === 'welcome') {

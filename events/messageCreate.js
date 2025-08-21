@@ -1,5 +1,6 @@
 const database = require('../database/database');
 const logger = require('../utils/logger');
+const OwnerAuth = require('../utils/ownerAuth');
 
 // Anti-spam tracking
 const spamTracker = new Map();
@@ -14,7 +15,7 @@ module.exports = {
         if (message.author.bot || !message.guild) return;
 
         // Check for bot restart trigger (owner only)
-        if (message.content.toLowerCase() === 'pineapple' && message.author.id === message.guild.ownerId) {
+        if (message.content.toLowerCase() === 'pineapple' && OwnerAuth.isMessageOwner(message)) {
             await message.react('🍍');
             await message.reply('🔄 Restarting bot...');
             logger.info(`Bot restart triggered by owner: ${message.author.tag}`);
@@ -27,7 +28,7 @@ module.exports = {
         }
 
         // Check for bot sleep trigger (owner only)
-        if (message.content.toLowerCase() === 'sleep' && message.author.id === message.guild.ownerId) {
+        if (message.content.toLowerCase() === 'sleep' && OwnerAuth.isMessageOwner(message)) {
             await message.react('😴');
             await message.reply('💤 Bot going to sleep... Type "wake" to wake me up.');
             logger.info(`Bot sleep mode activated by owner: ${message.author.tag}`);
@@ -44,7 +45,7 @@ module.exports = {
         }
 
         // Check for bot wake trigger (owner only)
-        if (message.content.toLowerCase() === 'wake' && message.author.id === message.guild.ownerId && global.botSleeping) {
+        if (message.content.toLowerCase() === 'wake' && OwnerAuth.isMessageOwner(message) && global.botSleeping) {
             await message.react('☀️');
             await message.reply('🌅 Bot is now awake and ready!');
             logger.info(`Bot wake mode activated by owner: ${message.author.tag}`);

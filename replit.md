@@ -20,7 +20,7 @@ Preferred communication style: Simple, everyday language.
 - Image upload support for both verification embeds and custom embed command with flexible positioning (August 19, 2025)
 - Line break support added to all text fields using \\n notation for paragraph formatting (August 21, 2025)
 - Professional bullet point formatting with hanging indents using • notation for clean bulletin-style lists (August 21, 2025)
-- Owner-only restrictions added to ALL commands for maximum security control (August 21, 2025)
+- Centralized owner-only security system implemented for ALL current and future commands (August 21, 2025)
 - Comprehensive welcome and leave message system with separate channel configuration: welcome messages in public channels, leave messages in private bot channels, owner-only management (August 19, 2025)
 - Detailed Discord role permissions guide created for multi-bot server setup and security best practices
 
