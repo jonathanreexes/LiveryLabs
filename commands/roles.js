@@ -164,7 +164,7 @@ async function handleGive(interaction) {
         await member.roles.add(role);
 
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('✅ Role Assigned')
             .setDescription(`Successfully gave ${role} to ${user}`)
             .addFields(
@@ -216,7 +216,7 @@ async function handleRemove(interaction) {
         await member.roles.remove(role);
 
         const embed = new EmbedBuilder()
-            .setColor('#ff6b6b')
+            .setColor(0xD3D3D3)
             .setTitle('❌ Role Removed')
             .setDescription(`Successfully removed ${role} from ${user}`)
             .addFields(
@@ -345,7 +345,7 @@ async function handleReactionAdd(interaction) {
         await message.react(emoji);
 
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('✅ Reaction Role Added')
             .setDescription(`Reaction role has been set up successfully!`)
             .addFields(
@@ -395,7 +395,7 @@ async function handleReactionRemove(interaction) {
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#ff6b6b')
+            .setColor(0xD3D3D3)
             .setTitle('❌ Reaction Role Removed')
             .setDescription(`Reaction role has been removed successfully!`)
             .addFields(

@@ -115,7 +115,7 @@ async function handlePlay(interaction, voiceChannel) {
         
         if (result.success) {
             const embed = new EmbedBuilder()
-                .setColor('#00ff00')
+                .setColor(0xD3D3D3)
                 .setTitle('🎵 Added to Queue')
                 .setDescription(`**${result.track.title}**`)
                 .addFields(
@@ -141,7 +141,7 @@ async function handlePause(interaction) {
     
     if (result.success) {
         const embed = new EmbedBuilder()
-            .setColor('#ffa500')
+            .setColor(0xD3D3D3)
             .setTitle('⏸️ Music Paused')
             .setDescription('The music has been paused')
             .setTimestamp();
@@ -173,7 +173,7 @@ async function handleStop(interaction) {
     
     if (result.success) {
         const embed = new EmbedBuilder()
-            .setColor('#ff0000')
+            .setColor(0xD3D3D3)
             .setTitle('⏹️ Music Stopped')
             .setDescription('Music stopped and queue cleared')
             .setTimestamp();
@@ -189,7 +189,7 @@ async function handleSkip(interaction) {
     
     if (result.success) {
         const embed = new EmbedBuilder()
-            .setColor('#4285f4')
+            .setColor(0xD3D3D3)
             .setTitle('⏭️ Song Skipped')
             .setDescription(result.nextTrack ? `Now playing: **${result.nextTrack.title}**` : 'Queue is now empty')
             .setTimestamp();
@@ -208,7 +208,7 @@ async function handleQueue(interaction) {
     }
 
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🎵 Music Queue')
         .setTimestamp();
 
@@ -232,7 +232,7 @@ async function handleVolume(interaction) {
     
     if (result.success) {
         const embed = new EmbedBuilder()
-            .setColor('#4285f4')
+            .setColor(0xD3D3D3)
             .setTitle('🔊 Volume Changed')
             .setDescription(`Volume set to **${volume}%**`)
             .setTimestamp();
@@ -251,7 +251,7 @@ async function handleNowPlaying(interaction) {
     }
 
     const embed = new EmbedBuilder()
-        .setColor('#00ff00')
+        .setColor(0xD3D3D3)
         .setTitle('🎵 Now Playing')
         .setDescription(`**${nowPlaying.title}**`)
         .addFields(
@@ -269,7 +269,7 @@ async function handleLeave(interaction) {
     
     if (result.success) {
         const embed = new EmbedBuilder()
-            .setColor('#ff6b6b')
+            .setColor(0xD3D3D3)
             .setTitle('👋 Left Voice Channel')
             .setDescription('Disconnected from voice channel and cleared the queue')
             .setTimestamp();

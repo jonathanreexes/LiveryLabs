@@ -113,7 +113,7 @@ async function handleBalance(interaction) {
         const userData = await database.getUser(user.id, interaction.guild.id);
         
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('💰 Balance')
             .setDescription(`${user.username} has **${userData.balance}** ${config.economy.currency}`)
             .setThumbnail(user.displayAvatarURL())
@@ -153,7 +153,7 @@ async function handleDaily(interaction) {
         );
 
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('🎁 Daily Reward Claimed!')
             .setDescription(`You received **${reward}** ${config.economy.currency}!`)
             .addFields(
@@ -223,7 +223,7 @@ async function handlePay(interaction) {
         await database.updateUserBalance(recipient.id, interaction.guild.id, amount);
 
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('💸 Payment Sent!')
             .setDescription(`${interaction.user.username} paid **${amount}** ${config.economy.currency} to ${recipient.username}`)
             .setTimestamp();
