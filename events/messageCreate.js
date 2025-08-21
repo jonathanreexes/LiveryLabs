@@ -13,6 +13,19 @@ module.exports = {
         // Ignore bots and DMs
         if (message.author.bot || !message.guild) return;
 
+        // Check for bot restart trigger (owner only)
+        if (message.content.toLowerCase() === 'pineapple' && message.author.id === message.guild.ownerId) {
+            await message.react('🍍');
+            await message.reply('🔄 Restarting bot...');
+            logger.info(`Bot restart triggered by owner: ${message.author.tag}`);
+            
+            // Graceful restart
+            setTimeout(() => {
+                process.exit(0);
+            }, 1000);
+            return;
+        }
+
         try {
             // Check if anti-spam is enabled  
             const settings = await new Promise((resolve, reject) => {
