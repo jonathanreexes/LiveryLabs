@@ -287,22 +287,22 @@ async function handleGamble(interaction) {
             // Lose
             result = 'lost';
             multiplier = -1;
-            color = '#ff0000';
+            color = 0xD3D3D3;
         } else if (chance < 0.85) {
             // Win small
             result = 'won';
             multiplier = 1.5;
-            color = '#00ff00';
+            color = 0xD3D3D3;
         } else if (chance < 0.95) {
             // Win big
             result = 'won big';
             multiplier = 2;
-            color = '#ffd700';
+            color = 0xD3D3D3;
         } else {
             // Jackpot
             result = 'hit the jackpot';
             multiplier = 3;
-            color = '#ff6b9d';
+            color = 0xD3D3D3;
         }
 
         const winnings = Math.floor(amount * multiplier) - amount;

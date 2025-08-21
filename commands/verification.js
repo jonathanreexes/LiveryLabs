@@ -140,7 +140,7 @@ module.exports = {
                     try {
                         verifiedRole = await interaction.guild.roles.create({
                             name: 'Verified',
-                            color: 0x00ff00,
+                            color: 0xD3D3D3,
                             reason: 'Verification system setup'
                         });
                     } catch (error) {

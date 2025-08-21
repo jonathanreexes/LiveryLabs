@@ -111,7 +111,7 @@ async function checkDangerousPermissions(oldMember, newMember) {
                 const embed = {
                     title: '🚨 Dangerous Permission Change',
                     description: `**User:** ${newMember.user.tag}\n**Added Permissions:** ${dangerousAdded.join(', ')}`,
-                    color: 0xff0000,
+                    color: 0xD3D3D3,
                     timestamp: new Date().toISOString()
                 };
                 
@@ -146,7 +146,7 @@ async function handleAntiNukeDetection(guild, type, changes) {
                         inline: false
                     }
                 ],
-                color: 0xff0000,
+                color: 0xD3D3D3,
                 timestamp: new Date().toISOString()
             };
 

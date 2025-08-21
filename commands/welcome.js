@@ -332,7 +332,7 @@ async function testWelcomeMessage(interaction) {
 
     const welcomeTitle = settings?.welcome_title || '🎉 Welcome to the server!';
     const welcomeMessage = settings?.welcome_message || 'Welcome {user}, we\'re glad to have you here!';
-    const welcomeColor = settings?.welcome_color || 0x00ff00;
+    const welcomeColor = settings?.welcome_color || 0xD3D3D3;
     const welcomeImageUrl = settings?.welcome_image_url;
 
     const processedMessage = welcomeMessage.replace('{user}', `${interaction.user}`).replace('{username}', interaction.user.username);
@@ -368,7 +368,7 @@ async function testLeaveMessage(interaction) {
 
     const leaveTitle = settings?.leave_title || '👋 Goodbye!';
     const leaveMessage = settings?.leave_message || '{username} has left the server';
-    const leaveColor = settings?.leave_color || 0xff6b6b;
+    const leaveColor = settings?.leave_color || 0xD3D3D3;
     const leaveImageUrl = settings?.leave_image_url;
 
     const processedMessage = leaveMessage.replace('{username}', interaction.user.username);

@@ -169,7 +169,7 @@ async function checkDuplicateAccount(message) {
                     const embed = {
                         title: '⚠️ Suspicious Account Activity',
                         description: `Multiple new accounts detected:\n${suspiciousPatterns.map(m => `• ${m.user.tag}`).slice(0, 5).join('\n')}`,
-                        color: 0xff9900,
+                        color: 0xD3D3D3,
                         timestamp: new Date().toISOString()
                     };
                     
