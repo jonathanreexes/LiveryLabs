@@ -16,7 +16,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('message')
-                        .setDescription('Custom verification message')
+                        .setDescription('Custom verification message (use \\n for line breaks)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('title')
@@ -28,7 +28,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('success_message')
-                        .setDescription('Custom success message text')
+                        .setDescription('Custom success message text (use \\n for line breaks)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('color')
@@ -168,7 +168,7 @@ module.exports = {
                 // Create verification message
                 const defaultMessage = 'Welcome to our server! Please click the button below to verify yourself and gain access to all channels and features.';
                 const defaultTitle = '🔐 Server Verification';
-                const description = customMessage || defaultMessage;
+                const description = (customMessage || defaultMessage).replace(/\\n/g, '\n');
                 const title = customTitle || defaultTitle;
                 
                 const verifyEmbed = new EmbedBuilder()

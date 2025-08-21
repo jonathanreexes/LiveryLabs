@@ -26,7 +26,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('welcome_message')
-                        .setDescription('Custom welcome message text (use {user} for mention, {username} for name)')
+                        .setDescription('Custom welcome message text (use {user} for mention, {username} for name, \\n for line breaks)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('leave_title')
@@ -34,7 +34,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('leave_message')
-                        .setDescription('Custom leave message text (use {username} for name)')
+                        .setDescription('Custom leave message text (use {username} for name, \\n for line breaks)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('welcome_color')

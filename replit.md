@@ -18,6 +18,7 @@ Preferred communication style: Simple, everyday language.
 - Timestamps removed from verification embeds for cleaner appearance (August 19, 2025)
 - Comprehensive giveaway system with full customization: custom titles, messages, banners, colors, and automated management
 - Image upload support for both verification embeds and custom embed command with flexible positioning (August 19, 2025)
+- Line break support added to all text fields using \\n notation for paragraph formatting (August 21, 2025)
 - Comprehensive welcome and leave message system with separate channel configuration: welcome messages in public channels, leave messages in private bot channels, owner-only management (August 19, 2025)
 - Detailed Discord role permissions guide created for multi-bot server setup and security best practices
 

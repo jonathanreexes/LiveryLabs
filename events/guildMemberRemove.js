@@ -37,8 +37,10 @@ module.exports = {
             const leaveImageUrl = settings.leave_image_url;
             const leaveImagePosition = settings.leave_image_position || 'image';
 
-            // Process message placeholders
-            const processedMessage = leaveMessage.replace('{username}', member.user.username);
+            // Process message placeholders and line breaks
+            const processedMessage = leaveMessage
+                .replace(/\\n/g, '\n')
+                .replace('{username}', member.user.username);
 
             // Create farewell embed
             const farewellEmbed = new EmbedBuilder()

@@ -191,7 +191,7 @@ async function handleVerification(interaction) {
         
         const embed = new EmbedBuilder()
             .setTitle(settings.success_title || defaultSuccessTitle)
-            .setDescription(settings.success_message || defaultSuccessMessage)
+            .setDescription((settings.success_message || defaultSuccessMessage).replace(/\\n/g, '\n'))
             .setColor(verificationColor);
 
         await interaction.reply({ embeds: [embed], ephemeral: true });

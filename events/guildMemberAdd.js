@@ -30,8 +30,9 @@ module.exports = {
             const welcomeImageUrl = settings.welcome_image_url;
             const welcomeImagePosition = settings.welcome_image_position || 'image';
 
-            // Process message placeholders
+            // Process message placeholders and line breaks
             const processedMessage = welcomeMessage
+                .replace(/\\n/g, '\n')
                 .replace('{user}', `${member}`)
                 .replace('{username}', member.user.username);
 
