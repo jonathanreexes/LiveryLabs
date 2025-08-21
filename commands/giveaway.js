@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
+const { formatMessage } = require('../utils/messageFormatter');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -29,7 +30,7 @@ module.exports = {
                         .setMaxValue(20))
                 .addStringOption(option =>
                     option.setName('requirements')
-                        .setDescription('Requirements to enter (optional)')
+                        .setDescription('Requirements to enter (use \\n, • for bullets)')
                         .setRequired(false))
                 .addChannelOption(option =>
                     option.setName('channel')
@@ -41,7 +42,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('message')
-                        .setDescription('Custom message for the giveaway (optional)')
+                        .setDescription('Custom giveaway message (use \\n, • for bullets)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('banner')
@@ -163,14 +164,14 @@ module.exports = {
         // Build description
         let description;
         if (customMessage) {
-            description = customMessage;
+            description = formatMessage(customMessage);
             description += `\n\n**Prize:** ${prize}`;
             description += `\n**Winners:** ${winners}`;
             description += `\n**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)`;
-            if (requirements) description += `\n**Requirements:** ${requirements}`;
+            if (requirements) description += `\n**Requirements:** ${formatMessage(requirements)}`;
             description += `\n\n**How to enter:** Click the 🎉 button below!`;
         } else {
-            description = `**Prize:** ${prize}\n\n**Winners:** ${winners}\n**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)${requirements ? `\n**Requirements:** ${requirements}` : ''}\n\n**How to enter:** Click the 🎉 button below!`;
+            description = `**Prize:** ${prize}\n\n**Winners:** ${winners}\n**Ends:** <t:${endTimestamp}:R> (<t:${endTimestamp}:F>)${requirements ? `\n**Requirements:** ${formatMessage(requirements)}` : ''}\n\n**How to enter:** Click the 🎉 button below!`;
         }
 
         // Create giveaway embed

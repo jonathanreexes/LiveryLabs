@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
 const logger = require('../utils/logger');
+const { formatMessage } = require('../utils/messageFormatter');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ module.exports = {
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('message')
-                .setDescription('Embed message/description')
+                .setDescription('Embed message/description (use \\n, • for bullets)')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('color')
@@ -104,7 +105,7 @@ module.exports = {
             // Create embed
             const embed = new EmbedBuilder()
                 .setTitle(title)
-                .setDescription(message)
+                .setDescription(formatMessage(message))
                 .setColor(embedColor);
 
             // Add optional fields
