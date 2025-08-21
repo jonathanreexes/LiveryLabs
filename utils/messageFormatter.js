@@ -16,41 +16,13 @@ function formatMessage(message) {
     // First, process basic line breaks
     let formatted = message.replace(/\\n/g, '\n');
 
-    // Handle bullet points with proper hanging indents
-    // Replace • followed by text with Discord-formatted bullet
-    formatted = formatted.replace(/^•\s*/gm, '• ');
+    // Handle bullet points where bullet is on its own line and text follows below
+    // Pattern: "• text content" becomes:
+    // •
+    // text content
+    formatted = formatted.replace(/^•\s+(.+)$/gm, '•\n$1');
     
-    // Handle multi-line bullet points with hanging indents
-    // This creates proper alignment for continuation lines
-    const lines = formatted.split('\n');
-    const formattedLines = [];
-    let inBulletPoint = false;
-    
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        
-        // Check if this line starts a bullet point
-        if (line.trim().startsWith('•')) {
-            inBulletPoint = true;
-            formattedLines.push(line);
-        } 
-        // Check if this is a continuation of a bullet point
-        else if (inBulletPoint && line.trim() !== '' && !line.trim().startsWith('•')) {
-            // Add proper indentation for continuation lines (3 spaces to align with text after bullet)
-            formattedLines.push('   ' + line.trim());
-        }
-        // Regular line or empty line (ends bullet point context)
-        else {
-            if (line.trim() === '') {
-                inBulletPoint = false;
-            } else {
-                inBulletPoint = false;
-            }
-            formattedLines.push(line);
-        }
-    }
-    
-    return formattedLines.join('\n');
+    return formatted;
 }
 
 /**
