@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
+const { formatMessage } = require('../utils/messageFormatter');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('message')
-                        .setDescription('Custom verification message (use \\n for line breaks)')
+                        .setDescription('Custom verification message (use \\n for line breaks, • for bullets)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('title')
@@ -28,7 +29,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('success_message')
-                        .setDescription('Custom success message text (use \\n for line breaks)')
+                        .setDescription('Custom success message text (use \\n for line breaks, • for bullets)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('color')
@@ -168,7 +169,7 @@ module.exports = {
                 // Create verification message
                 const defaultMessage = 'Welcome to our server! Please click the button below to verify yourself and gain access to all channels and features.';
                 const defaultTitle = '🔐 Server Verification';
-                const description = (customMessage || defaultMessage).replace(/\\n/g, '\n');
+                const description = formatMessage(customMessage || defaultMessage);
                 const title = customTitle || defaultTitle;
                 
                 const verifyEmbed = new EmbedBuilder()

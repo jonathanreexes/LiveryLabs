@@ -2,6 +2,7 @@ const { Events, InteractionType, EmbedBuilder, PermissionFlagsBits } = require('
 const logger = require('../utils/logger');
 const rateLimiter = require('../utils/rateLimiter');
 const database = require('../database/database');
+const { formatMessage } = require('../utils/messageFormatter');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -191,7 +192,7 @@ async function handleVerification(interaction) {
         
         const embed = new EmbedBuilder()
             .setTitle(settings.success_title || defaultSuccessTitle)
-            .setDescription((settings.success_message || defaultSuccessMessage).replace(/\\n/g, '\n'))
+            .setDescription(formatMessage(settings.success_message || defaultSuccessMessage))
             .setColor(verificationColor);
 
         await interaction.reply({ embeds: [embed], ephemeral: true });

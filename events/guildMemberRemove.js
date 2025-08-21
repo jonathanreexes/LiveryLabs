@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const logger = require('../utils/logger');
 const database = require('../database/database');
+const { formatMessage } = require('../utils/messageFormatter');
 
 module.exports = {
     name: Events.GuildMemberRemove,
@@ -38,8 +39,7 @@ module.exports = {
             const leaveImagePosition = settings.leave_image_position || 'image';
 
             // Process message placeholders and line breaks
-            const processedMessage = leaveMessage
-                .replace(/\\n/g, '\n')
+            const processedMessage = formatMessage(leaveMessage)
                 .replace('{username}', member.user.username);
 
             // Create farewell embed

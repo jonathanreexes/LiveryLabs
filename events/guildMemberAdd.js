@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const logger = require('../utils/logger');
 const database = require('../database/database');
+const { formatMessage } = require('../utils/messageFormatter');
 
 module.exports = {
     name: Events.GuildMemberAdd,
@@ -31,8 +32,7 @@ module.exports = {
             const welcomeImagePosition = settings.welcome_image_position || 'image';
 
             // Process message placeholders and line breaks
-            const processedMessage = welcomeMessage
-                .replace(/\\n/g, '\n')
+            const processedMessage = formatMessage(welcomeMessage)
                 .replace('{user}', `${member}`)
                 .replace('{username}', member.user.username);
 
