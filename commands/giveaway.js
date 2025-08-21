@@ -218,7 +218,7 @@ module.exports = {
         const confirmEmbed = new EmbedBuilder()
             .setTitle('✅ Giveaway Created')
             .setDescription(`Giveaway for **${prize}** has been created in ${channel}!\n\nIt will end <t:${endTimestamp}:R>.`)
-            .setColor(0x00ff00)
+            .setColor(0xD3D3D3)
             .setTimestamp();
 
         await interaction.reply({ embeds: [confirmEmbed], ephemeral: true });
@@ -291,7 +291,7 @@ module.exports = {
             const rerollEmbed = new EmbedBuilder()
                 .setTitle('🎉 Giveaway Rerolled!')
                 .setDescription(`**Prize:** ${giveaway.prize}\n\n**New Winner${winners.length > 1 ? 's' : ''}:** ${winnerMentions}\n\nCongratulations!`)
-                .setColor(0xff69b4)
+                .setColor(0xD3D3D3)
                 .setTimestamp();
 
             await channel.send({ embeds: [rerollEmbed] });
@@ -326,7 +326,7 @@ module.exports = {
         const listEmbed = new EmbedBuilder()
             .setTitle('🎉 Active Giveaways')
             .setDescription(giveawayList)
-            .setColor(0xff69b4)
+            .setColor(0xD3D3D3)
             .setTimestamp();
 
         await interaction.reply({ embeds: [listEmbed], ephemeral: true });
@@ -381,7 +381,7 @@ module.exports = {
                 const noWinnerEmbed = new EmbedBuilder()
                     .setTitle(giveaway.custom_title ? giveaway.custom_title.replace('🎉', '🔒') : '🔒 Giveaway Ended')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner:** No valid entries\n\nBetter luck next time!`)
-                    .setColor(0xff0000)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 if (giveaway.banner_url) {
@@ -393,7 +393,7 @@ module.exports = {
                 const noWinnerAnnouncement = new EmbedBuilder()
                     .setTitle('🎉 Giveaway Results')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner:** No valid entries\n\nThe giveaway has ended with no participants.`)
-                    .setColor(0xff0000)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 if (giveaway.banner_url) {
@@ -410,7 +410,7 @@ module.exports = {
                 const endedEmbed = new EmbedBuilder()
                     .setTitle(giveaway.custom_title ? giveaway.custom_title.replace('🎉', '🔒') : '🔒 Giveaway Ended')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner${winners.length > 1 ? 's' : ''}:** ${winnerMentions}\n\nCongratulations!`)
-                    .setColor(giveaway.embed_color || 0x00ff00)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 if (giveaway.banner_url) {
@@ -423,7 +423,7 @@ module.exports = {
                 const winnerAnnouncement = new EmbedBuilder()
                     .setTitle('🎉 Giveaway Results')
                     .setDescription(`**Prize:** ${giveaway.prize}\n\n**Winner${winners.length > 1 ? 's' : ''}:** ${winnerMentions}\n\nCongratulations! Please contact the giveaway host to claim your prize.`)
-                    .setColor(giveaway.embed_color || 0x00ff00)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 if (giveaway.banner_url) {

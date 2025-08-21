@@ -241,7 +241,7 @@ async function handleInfo(interaction) {
     const permissions = role.permissions.toArray();
     
     const embed = new EmbedBuilder()
-        .setColor(role.color || '#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🏷️ Role Information')
         .addFields(
             { name: 'Name', value: role.name, inline: true },
@@ -283,7 +283,7 @@ async function handleList(interaction) {
     }).slice(0, 20);
 
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🏷️ Server Roles')
         .setDescription(roleList.join('\n'))
         .setFooter({ text: `Total: ${roles.size} roles${roles.size > 20 ? ' (showing first 20)' : ''}` })
@@ -308,7 +308,7 @@ async function handleMembers(interaction) {
         .slice(0, 50);
 
     const embed = new EmbedBuilder()
-        .setColor(role.color || '#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle(`👥 Members with ${role.name}`)
         .setDescription(members.join('\n'))
         .setFooter({ 
@@ -438,7 +438,7 @@ async function handleSelfAssign(interaction) {
     }
 
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🏷️ Self-Assignable Roles')
         .setDescription('Select roles from the dropdown menu below to assign/remove them!')
         .setFooter({ text: 'You can select multiple roles at once' })

@@ -93,7 +93,7 @@ module.exports = {
             // Send DM with server info (optional)
             try {
                 const dmEmbed = new EmbedBuilder()
-                    .setColor('#4285f4')
+                    .setColor(0xD3D3D3)
                     .setTitle(`Welcome to ${member.guild.name}!`)
                     .setDescription('Here are some helpful commands to get you started:')
                     .addFields(

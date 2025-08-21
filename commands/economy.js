@@ -187,7 +187,7 @@ async function handleWork(interaction) {
         await database.updateUserBalance(interaction.user.id, interaction.guild.id, earnings);
 
         const embed = new EmbedBuilder()
-            .setColor('#4285f4')
+            .setColor(0xD3D3D3)
             .setTitle('💼 Work Complete!')
             .setDescription(`${randomMessage} **${earnings}** ${config.economy.currency}!`)
             .setTimestamp();
@@ -253,7 +253,7 @@ async function handleLeaderboard(interaction) {
         }
 
         const embed = new EmbedBuilder()
-            .setColor('#ffd700')
+            .setColor(0xD3D3D3)
             .setTitle('🏆 Server Leaderboard')
             .setDescription(
                 leaderboard.map((user, index) => {
@@ -335,7 +335,7 @@ async function handleShop(interaction) {
     ];
 
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🛒 Server Shop')
         .setDescription('Use `/economy buy <item>` to purchase items!')
         .addFields(
@@ -354,7 +354,7 @@ async function handleBuy(interaction) {
     const itemName = interaction.options.getString('item');
     
     const embed = new EmbedBuilder()
-        .setColor('#ff6b6b')
+        .setColor(0xD3D3D3)
         .setTitle('🛒 Shop Purchase')
         .setDescription(`Shop purchasing for **${itemName}** is not yet implemented. This feature requires additional server configuration.`)
         .setTimestamp();

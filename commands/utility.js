@@ -142,7 +142,7 @@ async function handleUserInfo(interaction) {
         .slice(0, 10);
 
     const embed = new EmbedBuilder()
-        .setColor(member.displayHexColor || '#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('👤 User Information')
         .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 256 }))
         .addFields(
@@ -176,7 +176,7 @@ async function handleServerInfo(interaction) {
     const emojis = guild.emojis.cache;
     
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🏰 Server Information')
         .setThumbnail(guild.iconURL({ dynamic: true, size: 256 }))
         .addFields(
@@ -209,7 +209,7 @@ async function handleAvatar(interaction) {
     const user = interaction.options.getUser('user') || interaction.user;
     
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle(`${user.username}'s Avatar`)
         .setImage(user.displayAvatarURL({ dynamic: true, size: 1024 }))
         .setDescription(`[Download Avatar](${user.displayAvatarURL({ dynamic: true, size: 1024 })})`)
@@ -223,7 +223,7 @@ async function handlePing(interaction) {
     const timeDiff = sent.createdTimestamp - interaction.createdTimestamp;
     
     const embed = new EmbedBuilder()
-        .setColor('#00ff00')
+        .setColor(0xD3D3D3)
         .setTitle('🏓 Pong!')
         .addFields(
             { name: 'Roundtrip Latency', value: `${timeDiff}ms`, inline: true },
@@ -236,7 +236,7 @@ async function handlePing(interaction) {
 
 async function handleInvite(interaction) {
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🤖 Invite Me!')
         .setDescription('Click the link below to invite me to your server!')
         .addFields(
@@ -258,7 +258,7 @@ async function handleUptime(interaction) {
     const uptimeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
     
     const embed = new EmbedBuilder()
-        .setColor('#00ff00')
+        .setColor(0xD3D3D3)
         .setTitle('⏰ Bot Uptime')
         .setDescription(`I have been running for **${uptimeString}**`)
         .addFields(
@@ -275,7 +275,7 @@ async function handleWeather(interaction) {
     // This would require a weather API key (OpenWeatherMap, etc.)
     // For now, we'll show a placeholder implementation
     const embed = new EmbedBuilder()
-        .setColor('#87ceeb')
+        .setColor(0xD3D3D3)
         .setTitle('🌤️ Weather Information')
         .setDescription(`Weather for **${location}**`)
         .addFields(
@@ -293,7 +293,7 @@ async function handleTranslate(interaction) {
     // This would require a translation API (Google Translate, etc.)
     // For now, we'll show a placeholder implementation
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🌐 Translation')
         .addFields(
             { name: 'Original Text', value: text, inline: false },
@@ -358,7 +358,7 @@ async function updateBotAvatar(interaction, avatarUrl) {
         await saveBotCustomization('avatar', avatarUrl, interaction.user.id);
         
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('✅ Avatar Updated')
             .setDescription('Bot profile picture has been successfully updated!')
             .setImage(avatarUrl)
@@ -390,7 +390,7 @@ async function updateBotBanner(interaction, bannerUrl) {
         await saveBotCustomization('banner', bannerUrl, interaction.user.id);
         
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('✅ Banner Updated')
             .setDescription('Bot banner has been successfully updated!')
             .setImage(bannerUrl)
@@ -430,7 +430,7 @@ async function updateBotName(interaction, newName) {
         await saveBotCustomization('name', newName, interaction.user.id);
         
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('✅ Name Updated')
             .setDescription(`Bot name has been successfully updated!`)
             .addFields(
@@ -501,7 +501,7 @@ async function handleCustomizations(interaction) {
         });
 
         const embed = new EmbedBuilder()
-            .setColor('#4285f4')
+            .setColor(0xD3D3D3)
             .setTitle('🎨 Bot Customization History')
             .setTimestamp();
 

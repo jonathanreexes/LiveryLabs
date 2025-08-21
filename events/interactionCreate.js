@@ -327,7 +327,7 @@ async function handleTicketClose(interaction) {
         await database.closeTicket(ticket.id);
 
         const closeEmbed = new EmbedBuilder()
-            .setColor('#ff0000')
+            .setColor(0xD3D3D3)
             .setTitle('🔒 Ticket Closed')
             .setDescription(`This ticket has been closed by ${interaction.user}`)
             .addFields(
@@ -397,7 +397,7 @@ async function handleSelfAssignRoles(interaction) {
 
     // Create response embed
     const embed = new EmbedBuilder()
-        .setColor('#4285f4')
+        .setColor(0xD3D3D3)
         .setTitle('🏷️ Role Assignment Results')
         .setTimestamp();
 

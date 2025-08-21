@@ -157,7 +157,7 @@ async function handleResume(interaction) {
     
     if (result.success) {
         const embed = new EmbedBuilder()
-            .setColor('#00ff00')
+            .setColor(0xD3D3D3)
             .setTitle('▶️ Music Resumed')
             .setDescription('The music has been resumed')
             .setTimestamp();

@@ -89,7 +89,7 @@ module.exports = {
 
             if (logChannel) {
                 const logEmbed = new EmbedBuilder()
-                    .setColor('#ffa500')
+                    .setColor(0xD3D3D3)
                     .setTitle('📤 Member Left')
                     .setDescription(`${member.user.tag} (${member.user.id}) left the server`)
                     .addFields(

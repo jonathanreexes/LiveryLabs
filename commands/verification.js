@@ -192,7 +192,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('✅ Verification Setup Complete')
                     .setDescription(`Single-step verification system configured!\n\n**Verified Role:** ${verifiedRole}\n**Channel:** ${verificationChannel}\n\n*New users will click verify and gain immediate access to your server.*`)
-                    .setColor(0x00ff00);
+                    .setColor(0xD3D3D3)
 
                 await interaction.reply({ embeds: [embed] });
                 logger.info(`Verification setup completed in guild ${guildId}`);
@@ -210,7 +210,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('🔐 Verification System')
                     .setDescription(`Verification has been **${enabled ? 'enabled' : 'disabled'}**`)
-                    .setColor(enabled ? 0x00ff00 : 0xff0000);
+                    .setColor(0xD3D3D3)
 
                 await interaction.reply({ embeds: [embed] });
 
@@ -227,7 +227,7 @@ module.exports = {
                     const embed = new EmbedBuilder()
                         .setTitle('❌ Setup Required')
                         .setDescription('Verification system is not set up. Use `/verification setup` first.')
-                        .setColor(0xff0000);
+                        .setColor(0xD3D3D3)
 
                     return await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
@@ -238,7 +238,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('✅ User Verified')
                     .setDescription(`${user} has been manually verified and given the ${verifiedRole} role.`)
-                    .setColor(0x00ff00);
+                    .setColor(0xD3D3D3)
 
                 await interaction.reply({ embeds: [embed] });
                 logger.info(`User ${user.tag} manually verified in guild ${guildId}`);
@@ -268,7 +268,7 @@ module.exports = {
                             inline: true 
                         }
                     )
-                    .setColor(0x3498db);
+                    .setColor(0xD3D3D3)
 
                 await interaction.reply({ embeds: [embed] });
             }
@@ -279,7 +279,7 @@ module.exports = {
             const errorEmbed = new EmbedBuilder()
                 .setTitle('❌ Error')
                 .setDescription('An error occurred while processing the verification command.')
-                .setColor(0xff0000);
+                .setColor(0xD3D3D3)
 
             await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }

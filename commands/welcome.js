@@ -199,7 +199,7 @@ module.exports = {
                         { name: '🎨 Colors', value: `Welcome: #${welcomeColor.toString(16).padStart(6, '0')}\nLeave: #${leaveColor.toString(16).padStart(6, '0')}`, inline: false },
                         { name: '🖼️ Images', value: `Welcome: ${welcomeImageUrl ? '✅ Custom' : '❌ None'}\nLeave: ${leaveImageUrl ? '✅ Custom' : '❌ None'}`, inline: true }
                     )
-                    .setColor(0x00ff00);
+                    .setColor(0xD3D3D3)
 
                 await interaction.reply({ embeds: [embed] });
                 logger.info(`Welcome/leave messages configured in guild ${guildId} by ${interaction.user.tag}`);
@@ -228,7 +228,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('🔄 Settings Updated')
                     .setDescription(`${feature.charAt(0).toUpperCase() + feature.slice(1)} messages have been **${enabled ? 'enabled' : 'disabled'}**`)
-                    .setColor(enabled ? 0x00ff00 : 0xff0000);
+                    .setColor(0xD3D3D3)
 
                 await interaction.reply({ embeds: [embed] });
 
@@ -249,7 +249,7 @@ module.exports = {
 
                 const embed = new EmbedBuilder()
                     .setTitle('📊 Welcome/Leave Status')
-                    .setColor(0x5865F2);
+                    .setColor(0xD3D3D3)
 
                 if (!settings) {
                     embed.setDescription('❌ Welcome/leave messages are not configured. Use `/welcome setup` to get started.');

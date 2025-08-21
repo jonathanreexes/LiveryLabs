@@ -58,7 +58,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('🛡️ Anti-Spam Protection')
                     .setDescription(`Anti-spam protection has been **${enabled ? 'enabled' : 'disabled'}**`)
-                    .setColor(enabled ? 0x00ff00 : 0xff0000)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 await interaction.reply({ embeds: [embed] });
@@ -78,7 +78,7 @@ module.exports = {
                 const embed = new EmbedBuilder()
                     .setTitle('🔒 Anti-Nuke Protection')
                     .setDescription(`Anti-nuke protection has been **${enabled ? 'enabled' : 'disabled'}**`)
-                    .setColor(enabled ? 0x00ff00 : 0xff0000)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 await interaction.reply({ embeds: [embed] });
@@ -109,7 +109,7 @@ module.exports = {
                             inline: true 
                         }
                     )
-                    .setColor(0x3498db)
+                    .setColor(0xD3D3D3)
                     .setTimestamp();
 
                 await interaction.reply({ embeds: [embed] });
@@ -121,7 +121,7 @@ module.exports = {
             const errorEmbed = new EmbedBuilder()
                 .setTitle('❌ Error')
                 .setDescription('An error occurred while processing the command.')
-                .setColor(0xff0000);
+                .setColor(0xD3D3D3)
 
             await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
         }
