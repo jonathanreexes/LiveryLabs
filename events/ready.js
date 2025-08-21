@@ -26,6 +26,7 @@ module.exports = {
             client.commands.forEach(command => {
                 if (command.data) {
                     commands.push(command.data.toJSON());
+                    logger.info(`Registering command: ${command.data.name}`);
                 }
             });
 
