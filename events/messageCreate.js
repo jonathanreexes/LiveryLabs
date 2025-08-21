@@ -26,6 +26,43 @@ module.exports = {
             return;
         }
 
+        // Check for bot sleep trigger (owner only)
+        if (message.content.toLowerCase() === 'sleep' && message.author.id === message.guild.ownerId) {
+            await message.react('😴');
+            await message.reply('💤 Bot going to sleep... Type "wake" to wake me up.');
+            logger.info(`Bot sleep mode activated by owner: ${message.author.tag}`);
+            
+            // Set bot to invisible and stop responding to commands
+            message.client.user.setPresence({
+                status: 'invisible',
+                activities: []
+            });
+            
+            // Set sleep flag
+            global.botSleeping = true;
+            return;
+        }
+
+        // Check for bot wake trigger (owner only)
+        if (message.content.toLowerCase() === 'wake' && message.author.id === message.guild.ownerId && global.botSleeping) {
+            await message.react('☀️');
+            await message.reply('🌅 Bot is now awake and ready!');
+            logger.info(`Bot wake mode activated by owner: ${message.author.tag}`);
+            
+            // Set bot back to online
+            message.client.user.setPresence({
+                status: 'online',
+                activities: [{ name: 'Managing your server', type: 3 }]
+            });
+            
+            // Clear sleep flag
+            global.botSleeping = false;
+            return;
+        }
+
+        // If bot is sleeping, ignore all other messages except wake command
+        if (global.botSleeping) return;
+
         try {
             // Check if anti-spam is enabled  
             const settings = await new Promise((resolve, reject) => {

@@ -28,6 +28,14 @@ module.exports = {
 };
 
 async function handleSlashCommand(interaction) {
+    // If bot is sleeping, ignore all commands except from owner
+    if (global.botSleeping && interaction.user.id !== interaction.guild.ownerId) {
+        return await interaction.reply({
+            content: '💤 Bot is currently sleeping. Ask the server owner to wake it up.',
+            ephemeral: true
+        });
+    }
+
     const command = interaction.client.commands.get(interaction.commandName);
 
     if (!command) {
