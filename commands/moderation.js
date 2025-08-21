@@ -41,6 +41,14 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         const guildId = interaction.guild.id;
 
+        // Restrict anti-nuke to owner only, but allow anti-spam for managers
+        if (subcommand === 'antinuke' && interaction.user.id !== interaction.guild.ownerId) {
+            return await interaction.reply({
+                content: '❌ Anti-nuke protection can only be configured by the server owner.',
+                ephemeral: true
+            });
+        }
+
         try {
             if (subcommand === 'antispam') {
                 const action = interaction.options.getString('action');

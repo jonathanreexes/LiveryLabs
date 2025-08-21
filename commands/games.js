@@ -60,6 +60,14 @@ module.exports = {
                 .setDescription('Get a random joke')),
 
     async execute(interaction) {
+        // Check if user is server owner
+        if (interaction.user.id !== interaction.guild.ownerId) {
+            return await interaction.reply({
+                content: '❌ This command can only be used by the server owner.',
+                ephemeral: true
+            });
+        }
+
         const subcommand = interaction.options.getSubcommand();
 
         try {
