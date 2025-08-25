@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
 const { formatMessage } = require('../utils/messageFormatter');
@@ -92,7 +92,7 @@ module.exports = {
                         } else {
                             return await interaction.reply({ 
                                 content: '❌ Invalid hex color code! Use format #FF5733', 
-                                ephemeral: true 
+                                flags: MessageFlags.Ephemeral 
                             });
                         }
                     } else {
@@ -113,7 +113,7 @@ module.exports = {
                         } else {
                             return await interaction.reply({ 
                                 content: '❌ Invalid color! Use: blue, green, red, purple, orange, yellow, pink, or hex code (#FF5733)', 
-                                ephemeral: true 
+                                flags: MessageFlags.Ephemeral 
                             });
                         }
                     }
@@ -128,7 +128,7 @@ module.exports = {
                     if (!validTypes.includes(imageAttachment.contentType) || imageAttachment.size > maxSize) {
                         return await interaction.reply({
                             content: '❌ Invalid image file. Please upload a valid image (jpg, jpeg, png, gif, webp) under 8MB.',
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     }
                     
@@ -146,7 +146,7 @@ module.exports = {
                     } catch (error) {
                         return await interaction.reply({ 
                             content: '❌ Could not create verified role. Please create a role and specify it manually.', 
-                            ephemeral: true 
+                            flags: MessageFlags.Ephemeral 
                         });
                     }
                 }
@@ -229,7 +229,7 @@ module.exports = {
                         .setDescription('Verification system is not set up. Use `/verification setup` first.')
                         .setColor(0xD3D3D3)
 
-                    return await interaction.reply({ embeds: [embed], ephemeral: true });
+                    return await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 }
 
                 const verifiedRole = interaction.guild.roles.cache.get(settings.verified_role_id);
@@ -281,7 +281,7 @@ module.exports = {
                 .setDescription('An error occurred while processing the verification command.')
                 .setColor(0xD3D3D3)
 
-            await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
         }
     }
 };

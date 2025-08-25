@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ActionRowBuilder, StringSelectMenuBuilder, MessageFlags } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
 
@@ -117,7 +117,7 @@ module.exports = {
             logger.error('Error in roles command:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while executing the roles command.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
@@ -127,7 +127,7 @@ async function handleGive(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
         return interaction.reply({ 
             content: '❌ You don\'t have permission to manage roles!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -136,27 +136,27 @@ async function handleGive(interaction) {
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
-        return interaction.reply({ content: '❌ User not found in this server!', ephemeral: true });
+        return interaction.reply({ content: '❌ User not found in this server!', flags: MessageFlags.Ephemeral });
     }
 
     if (role.position >= interaction.member.roles.highest.position) {
         return interaction.reply({ 
             content: '❌ You cannot assign roles higher than or equal to your highest role!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
     if (role.position >= interaction.guild.members.me.roles.highest.position) {
         return interaction.reply({ 
             content: '❌ I cannot assign roles higher than or equal to my highest role!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
     if (member.roles.cache.has(role.id)) {
         return interaction.reply({ 
             content: `❌ ${user.username} already has the ${role.name} role!`, 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -178,7 +178,7 @@ async function handleGive(interaction) {
         logger.info(`Role ${role.name} assigned to ${user.tag} by ${interaction.user.tag}`);
     } catch (error) {
         logger.error('Error assigning role:', error);
-        await interaction.reply({ content: '❌ Failed to assign the role!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to assign the role!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -186,7 +186,7 @@ async function handleRemove(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
         return interaction.reply({ 
             content: '❌ You don\'t have permission to manage roles!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -195,20 +195,20 @@ async function handleRemove(interaction) {
     const member = interaction.guild.members.cache.get(user.id);
 
     if (!member) {
-        return interaction.reply({ content: '❌ User not found in this server!', ephemeral: true });
+        return interaction.reply({ content: '❌ User not found in this server!', flags: MessageFlags.Ephemeral });
     }
 
     if (role.position >= interaction.member.roles.highest.position) {
         return interaction.reply({ 
             content: '❌ You cannot remove roles higher than or equal to your highest role!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
     if (!member.roles.cache.has(role.id)) {
         return interaction.reply({ 
             content: `❌ ${user.username} doesn't have the ${role.name} role!`, 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -230,7 +230,7 @@ async function handleRemove(interaction) {
         logger.info(`Role ${role.name} removed from ${user.tag} by ${interaction.user.tag}`);
     } catch (error) {
         logger.error('Error removing role:', error);
-        await interaction.reply({ content: '❌ Failed to remove the role!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to remove the role!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -274,7 +274,7 @@ async function handleList(interaction) {
         .sort((a, b) => b.position - a.position);
 
     if (roles.size === 0) {
-        return interaction.reply({ content: '❌ No roles found in this server!', ephemeral: true });
+        return interaction.reply({ content: '❌ No roles found in this server!', flags: MessageFlags.Ephemeral });
     }
 
     const roleList = roles.map(role => {
@@ -298,7 +298,7 @@ async function handleMembers(interaction) {
     if (role.members.size === 0) {
         return interaction.reply({ 
             content: `❌ No members have the ${role.name} role!`, 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -323,7 +323,7 @@ async function handleReactionAdd(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
         return interaction.reply({ 
             content: '❌ You don\'t have permission to manage reaction roles!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -335,7 +335,7 @@ async function handleReactionAdd(interaction) {
         const message = await interaction.channel.messages.fetch(messageId);
         
         if (!message) {
-            return interaction.reply({ content: '❌ Message not found!', ephemeral: true });
+            return interaction.reply({ content: '❌ Message not found!', flags: MessageFlags.Ephemeral });
         }
 
         // Add reaction role to database
@@ -359,7 +359,7 @@ async function handleReactionAdd(interaction) {
         logger.info(`Reaction role added: ${emoji} -> ${role.name} by ${interaction.user.tag}`);
     } catch (error) {
         logger.error('Error adding reaction role:', error);
-        await interaction.reply({ content: '❌ Failed to add reaction role!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to add reaction role!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -367,7 +367,7 @@ async function handleReactionRemove(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
         return interaction.reply({ 
             content: '❌ You don\'t have permission to manage reaction roles!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -390,7 +390,7 @@ async function handleReactionRemove(interaction) {
         if (result === 0) {
             return interaction.reply({ 
                 content: '❌ No reaction role found for that emoji on that message!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
 
@@ -408,7 +408,7 @@ async function handleReactionRemove(interaction) {
         logger.info(`Reaction role removed: ${emoji} by ${interaction.user.tag}`);
     } catch (error) {
         logger.error('Error removing reaction role:', error);
-        await interaction.reply({ content: '❌ Failed to remove reaction role!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to remove reaction role!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -416,7 +416,7 @@ async function handleSelfAssign(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) {
         return interaction.reply({ 
             content: '❌ You don\'t have permission to create self-assign menus!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -433,7 +433,7 @@ async function handleSelfAssign(interaction) {
     if (assignableRoles.length === 0) {
         return interaction.reply({ 
             content: '❌ No assignable roles found!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 

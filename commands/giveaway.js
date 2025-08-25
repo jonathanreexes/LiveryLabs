@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
 const { formatMessage } = require('../utils/messageFormatter');
@@ -98,9 +98,9 @@ module.exports = {
             const errorMessage = '❌ An error occurred while processing the giveaway command.';
             
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, ephemeral: true });
+                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
         }
     },
@@ -120,7 +120,7 @@ module.exports = {
         if (channel.type !== 0) { // 0 = GUILD_TEXT
             return await interaction.reply({
                 content: '❌ Giveaways can only be created in text channels.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -131,7 +131,7 @@ module.exports = {
         if (!channelPermissions.has(['SendMessages', 'EmbedLinks', 'AddReactions'])) {
             return await interaction.reply({
                 content: '❌ I need Send Messages, Embed Links, and Add Reactions permissions in that channel.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -144,7 +144,7 @@ module.exports = {
             } else {
                 return await interaction.reply({
                     content: '❌ Invalid color format. Please use hex format like #FF5733 or FF5733.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }
@@ -153,7 +153,7 @@ module.exports = {
         if (bannerUrl && !this.isValidImageUrl(bannerUrl)) {
             return await interaction.reply({
                 content: '❌ Invalid banner URL. Please provide a valid image URL (jpg, jpeg, png, gif, webp).',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -221,7 +221,7 @@ module.exports = {
             .setColor(0xD3D3D3)
             .setTimestamp();
 
-        await interaction.reply({ embeds: [confirmEmbed], ephemeral: true });
+        await interaction.reply({ embeds: [confirmEmbed], flags: MessageFlags.Ephemeral });
         logger.info(`Giveaway created by ${interaction.user.tag} in ${interaction.guild.name}: ${prize}`);
     },
 
@@ -237,7 +237,7 @@ module.exports = {
         if (!giveaway) {
             return await interaction.reply({
                 content: '❌ No active giveaway found with that ID.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -245,7 +245,7 @@ module.exports = {
 
         await interaction.reply({
             content: '✅ Giveaway has been ended and winners have been selected!',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     },
 
@@ -262,7 +262,7 @@ module.exports = {
         if (!giveaway) {
             return await interaction.reply({
                 content: '❌ No giveaway found with that ID.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -277,7 +277,7 @@ module.exports = {
         if (entries.length === 0) {
             return await interaction.reply({
                 content: '❌ No entries found for this giveaway.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -299,7 +299,7 @@ module.exports = {
 
         await interaction.reply({
             content: `✅ Giveaway rerolled! ${winnersToSelect} new winner${winnersToSelect > 1 ? 's' : ''} selected.`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         logger.info(`Giveaway rerolled by ${interaction.user.tag}: ${giveaway.prize}`);
@@ -314,7 +314,7 @@ module.exports = {
         if (giveaways.length === 0) {
             return await interaction.reply({
                 content: '📭 No active giveaways in this server.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -329,7 +329,7 @@ module.exports = {
             .setColor(0xD3D3D3)
             .setTimestamp();
 
-        await interaction.reply({ embeds: [listEmbed], ephemeral: true });
+        await interaction.reply({ embeds: [listEmbed], flags: MessageFlags.Ephemeral });
     },
 
     async endGiveawayAutomatically(messageId, guildId) {

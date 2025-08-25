@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const logger = require('../utils/logger');
 const permissionManager = require('../utils/permissions');
 const database = require('../database/database');
@@ -121,7 +121,7 @@ module.exports = {
             logger.error('Error in utility command:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while executing the utility command.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
@@ -132,7 +132,7 @@ async function handleUserInfo(interaction) {
     const member = interaction.guild.members.cache.get(user.id);
     
     if (!member) {
-        return interaction.reply({ content: '❌ User not found in this server!', ephemeral: true });
+        return interaction.reply({ content: '❌ User not found in this server!', flags: MessageFlags.Ephemeral });
     }
 
     const roles = member.roles.cache
@@ -312,7 +312,7 @@ async function handleCustomize(interaction) {
     if (!permissionManager.hasPermissionLevel(member, permissionManager.permissionLevels.ADMIN)) {
         return interaction.reply({ 
             content: '❌ You need administrator permissions to customize the bot!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -484,7 +484,7 @@ async function handleCustomizations(interaction) {
     if (!permissionManager.hasPermissionLevel(member, permissionManager.permissionLevels.ADMIN)) {
         return interaction.reply({ 
             content: '❌ You need administrator permissions to view bot customization history!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -548,7 +548,7 @@ async function handleCustomizations(interaction) {
         logger.error('Error fetching customization history:', error);
         await interaction.reply({ 
             content: '❌ Failed to retrieve customization history.', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 }

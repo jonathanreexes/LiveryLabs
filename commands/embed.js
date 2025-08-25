@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
@@ -46,7 +46,7 @@ module.exports = {
 
     async execute(interaction) {
         try {
-            await interaction.deferReply({ ephemeral: true });
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
             const title = interaction.options.getString('title');
             const message = interaction.options.getString('message');
@@ -180,7 +180,7 @@ module.exports = {
             if (interaction.deferred) {
                 await interaction.editReply({ content: errorMessage });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
         }
     },

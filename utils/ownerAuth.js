@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const logger = require('./logger');
 
 /**
@@ -30,7 +31,7 @@ class OwnerAuth {
             
             await interaction.reply({
                 content: message,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             
             logger.warn(`Unauthorized command attempt: ${interaction.commandName} by ${interaction.user.tag} (${interaction.user.id}) in guild ${interaction.guild.id}`);

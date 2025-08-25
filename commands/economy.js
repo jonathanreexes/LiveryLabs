@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
 const config = require('../config.json');
@@ -99,7 +99,7 @@ module.exports = {
             logger.error('Error in economy command:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while executing the economy command.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
@@ -122,7 +122,7 @@ async function handleBalance(interaction) {
         await interaction.reply({ embeds: [embed] });
     } catch (error) {
         logger.error('Error fetching balance:', error);
-        await interaction.reply({ content: '❌ Failed to fetch balance!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to fetch balance!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -139,7 +139,7 @@ async function handleDaily(interaction) {
             
             return interaction.reply({ 
                 content: `❌ You can claim your daily reward in **${hours}h ${minutes}m**!`, 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
 
@@ -164,7 +164,7 @@ async function handleDaily(interaction) {
         await interaction.reply({ embeds: [embed] });
     } catch (error) {
         logger.error('Error with daily command:', error);
-        await interaction.reply({ content: '❌ Failed to claim daily reward!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to claim daily reward!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -195,7 +195,7 @@ async function handleWork(interaction) {
         await interaction.reply({ embeds: [embed] });
     } catch (error) {
         logger.error('Error with work command:', error);
-        await interaction.reply({ content: '❌ Failed to work!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to work!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -204,11 +204,11 @@ async function handlePay(interaction) {
     const amount = interaction.options.getInteger('amount');
 
     if (recipient.id === interaction.user.id) {
-        return interaction.reply({ content: '❌ You cannot pay yourself!', ephemeral: true });
+        return interaction.reply({ content: '❌ You cannot pay yourself!', flags: MessageFlags.Ephemeral });
     }
 
     if (recipient.bot) {
-        return interaction.reply({ content: '❌ You cannot pay bots!', ephemeral: true });
+        return interaction.reply({ content: '❌ You cannot pay bots!', flags: MessageFlags.Ephemeral });
     }
 
     try {
@@ -216,7 +216,7 @@ async function handlePay(interaction) {
         const senderData = await database.getUser(interaction.user.id, interaction.guild.id);
 
         if (senderData.balance < amount) {
-            return interaction.reply({ content: '❌ You don\'t have enough coins!', ephemeral: true });
+            return interaction.reply({ content: '❌ You don\'t have enough coins!', flags: MessageFlags.Ephemeral });
         }
 
         await database.updateUserBalance(interaction.user.id, interaction.guild.id, -amount);
@@ -231,7 +231,7 @@ async function handlePay(interaction) {
         await interaction.reply({ embeds: [embed] });
     } catch (error) {
         logger.error('Error with pay command:', error);
-        await interaction.reply({ content: '❌ Failed to send payment!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to send payment!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -249,7 +249,7 @@ async function handleLeaderboard(interaction) {
         });
 
         if (leaderboard.length === 0) {
-            return interaction.reply({ content: '❌ No users found in the economy system!', ephemeral: true });
+            return interaction.reply({ content: '❌ No users found in the economy system!', flags: MessageFlags.Ephemeral });
         }
 
         const embed = new EmbedBuilder()
@@ -266,7 +266,7 @@ async function handleLeaderboard(interaction) {
         await interaction.reply({ embeds: [embed] });
     } catch (error) {
         logger.error('Error with leaderboard command:', error);
-        await interaction.reply({ content: '❌ Failed to fetch leaderboard!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to fetch leaderboard!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -277,7 +277,7 @@ async function handleGamble(interaction) {
         const userData = await database.getUser(interaction.user.id, interaction.guild.id);
 
         if (userData.balance < amount) {
-            return interaction.reply({ content: '❌ You don\'t have enough coins to gamble!', ephemeral: true });
+            return interaction.reply({ content: '❌ You don\'t have enough coins to gamble!', flags: MessageFlags.Ephemeral });
         }
 
         const chance = Math.random();
@@ -321,7 +321,7 @@ async function handleGamble(interaction) {
         await interaction.reply({ embeds: [embed] });
     } catch (error) {
         logger.error('Error with gamble command:', error);
-        await interaction.reply({ content: '❌ Failed to gamble!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to gamble!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -359,5 +359,5 @@ async function handleBuy(interaction) {
         .setDescription(`Shop purchasing for **${itemName}** is not yet implemented. This feature requires additional server configuration.`)
         .setTimestamp();
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }

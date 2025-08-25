@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const logger = require('../utils/logger');
 
 module.exports = {
@@ -55,7 +55,7 @@ module.exports = {
                     if (!global.botSleeping) {
                         return await interaction.reply({
                             content: '☀️ Bot is already awake!',
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     }
 
@@ -110,7 +110,7 @@ module.exports = {
             if (!interaction.replied) {
                 await interaction.reply({
                     content: '❌ An error occurred while executing the control command.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }

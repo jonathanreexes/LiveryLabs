@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
 
@@ -137,7 +137,7 @@ module.exports = {
                     if (processedColor.error) {
                         return await interaction.reply({ 
                             content: `❌ Invalid welcome color! ${processedColor.error}`, 
-                            ephemeral: true 
+                            flags: MessageFlags.Ephemeral 
                         });
                     }
                     welcomeColor = processedColor.color;
@@ -148,7 +148,7 @@ module.exports = {
                     if (processedColor.error) {
                         return await interaction.reply({ 
                             content: `❌ Invalid leave color! ${processedColor.error}`, 
-                            ephemeral: true 
+                            flags: MessageFlags.Ephemeral 
                         });
                     }
                     leaveColor = processedColor.color;
@@ -163,7 +163,7 @@ module.exports = {
                     if (validation.error) {
                         return await interaction.reply({
                             content: `❌ Invalid welcome image: ${validation.error}`,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     }
                     welcomeImageUrl = welcomeImage.url;
@@ -174,7 +174,7 @@ module.exports = {
                     if (validation.error) {
                         return await interaction.reply({
                             content: `❌ Invalid leave image: ${validation.error}`,
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     }
                     leaveImageUrl = leaveImage.url;
@@ -275,7 +275,7 @@ module.exports = {
             logger.error('Error in welcome command:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while processing the welcome command.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
@@ -355,7 +355,7 @@ async function testWelcomeMessage(interaction) {
     await interaction.reply({ 
         content: '🧪 **Test Welcome Message:**',
         embeds: [embed],
-        ephemeral: true 
+        flags: MessageFlags.Ephemeral 
     });
 }
 
@@ -391,6 +391,6 @@ async function testLeaveMessage(interaction) {
     await interaction.reply({ 
         content: '🧪 **Test Leave Message:**',
         embeds: [embed],
-        ephemeral: true 
+        flags: MessageFlags.Ephemeral 
     });
 }

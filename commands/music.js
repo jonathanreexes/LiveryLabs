@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const musicPlayer = require('../services/musicPlayer');
 const logger = require('../utils/logger');
 
@@ -61,7 +61,7 @@ module.exports = {
         if (!voiceChannel && !['queue', 'nowplaying'].includes(subcommand)) {
             return interaction.reply({ 
                 content: '❌ You need to be in a voice channel to use music commands!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
 
@@ -99,7 +99,7 @@ module.exports = {
             logger.error('Error in music command:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while executing the music command.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
@@ -148,7 +148,7 @@ async function handlePause(interaction) {
 
         await interaction.reply({ embeds: [embed] });
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, ephemeral: true });
+        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -164,7 +164,7 @@ async function handleResume(interaction) {
 
         await interaction.reply({ embeds: [embed] });
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, ephemeral: true });
+        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -180,7 +180,7 @@ async function handleStop(interaction) {
 
         await interaction.reply({ embeds: [embed] });
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, ephemeral: true });
+        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -196,7 +196,7 @@ async function handleSkip(interaction) {
 
         await interaction.reply({ embeds: [embed] });
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, ephemeral: true });
+        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -204,7 +204,7 @@ async function handleQueue(interaction) {
     const queue = musicPlayer.getQueue(interaction.guild.id);
     
     if (!queue || queue.length === 0) {
-        return interaction.reply({ content: '❌ The music queue is empty!', ephemeral: true });
+        return interaction.reply({ content: '❌ The music queue is empty!', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
@@ -239,7 +239,7 @@ async function handleVolume(interaction) {
 
         await interaction.reply({ embeds: [embed] });
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, ephemeral: true });
+        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -247,7 +247,7 @@ async function handleNowPlaying(interaction) {
     const nowPlaying = musicPlayer.getNowPlaying(interaction.guild.id);
     
     if (!nowPlaying) {
-        return interaction.reply({ content: '❌ Nothing is currently playing!', ephemeral: true });
+        return interaction.reply({ content: '❌ Nothing is currently playing!', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
@@ -276,6 +276,6 @@ async function handleLeave(interaction) {
 
         await interaction.reply({ embeds: [embed] });
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, ephemeral: true });
+        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
     }
 }

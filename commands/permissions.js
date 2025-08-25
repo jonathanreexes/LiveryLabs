@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const logger = require('../utils/logger');
 
 module.exports = {
@@ -51,9 +51,9 @@ module.exports = {
             const errorMessage = '❌ An error occurred while managing permissions.';
             
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, ephemeral: true });
+                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
         }
     },
@@ -62,7 +62,7 @@ module.exports = {
         const role = interaction.options.getRole('role');
         const action = interaction.options.getString('action');
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         try {
             // Get all bot commands
@@ -131,7 +131,7 @@ module.exports = {
     },
 
     async handleList(interaction) {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         try {
             const commands = await interaction.guild.commands.fetch();
@@ -188,7 +188,7 @@ module.exports = {
     },
 
     async handleUpdate(interaction) {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         try {
             // Refresh all command permissions

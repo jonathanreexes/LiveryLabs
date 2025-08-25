@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const database = require('../database/database');
 const logger = require('../utils/logger');
 const config = require('../config.json');
@@ -123,7 +123,7 @@ module.exports = {
                 .setDescription('An error occurred while processing the command.')
                 .setColor(0xD3D3D3)
 
-            await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
         }
     }
 };

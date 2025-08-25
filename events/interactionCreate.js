@@ -1,4 +1,4 @@
-const { Events, InteractionType, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { Events, InteractionType, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const logger = require('../utils/logger');
 const rateLimiter = require('../utils/rateLimiter');
 const database = require('../database/database');
@@ -20,9 +20,9 @@ module.exports = {
             const errorMessage = '❌ An unexpected error occurred while processing your interaction.';
             
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, ephemeral: true });
+                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
         }
     }
@@ -38,7 +38,7 @@ async function handleSlashCommand(interaction) {
     if (global.botSleeping && !OwnerAuth.isOwner(interaction)) {
         return await interaction.reply({
             content: '💤 Bot is currently sleeping. Ask the server owner to wake it up.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 
@@ -48,7 +48,7 @@ async function handleSlashCommand(interaction) {
         logger.warn(`Unknown command: ${interaction.commandName}`);
         return interaction.reply({ 
             content: '❌ Unknown command!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -57,7 +57,7 @@ async function handleSlashCommand(interaction) {
     if (isRateLimited) {
         return interaction.reply({ 
             content: '⏰ You\'re using commands too fast! Please slow down.', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -65,7 +65,7 @@ async function handleSlashCommand(interaction) {
     if (!interaction.guild && command.guildOnly) {
         return interaction.reply({ 
             content: '❌ This command can only be used in servers!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -75,7 +75,7 @@ async function handleSlashCommand(interaction) {
         if (command.botPermissions && !botMember.permissions.has(command.botPermissions)) {
             return interaction.reply({ 
                 content: '❌ I don\'t have the required permissions to execute this command!', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
@@ -90,9 +90,9 @@ async function handleSlashCommand(interaction) {
         const errorMessage = '❌ There was an error executing this command!';
         
         if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: errorMessage, ephemeral: true });
+            await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
         } else {
-            await interaction.reply({ content: errorMessage, ephemeral: true });
+            await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
         }
     }
 }
@@ -123,9 +123,9 @@ async function handleMessageComponent(interaction) {
         const errorMessage = '❌ There was an error processing your interaction!';
         
         if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: errorMessage, ephemeral: true });
+            await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
         } else {
-            await interaction.reply({ content: errorMessage, ephemeral: true });
+            await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
         }
     }
 }
@@ -146,7 +146,7 @@ async function handleTicketCreation(interaction) {
     if (existingTicket) {
         return interaction.reply({ 
             content: '❌ You already have an open ticket! Please close it before creating a new one.', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -174,7 +174,7 @@ async function handleVerification(interaction) {
         if (!settings?.verification_enabled || !settings?.verified_role_id) {
             return interaction.reply({
                 content: '❌ Verification is not properly configured on this server.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -184,7 +184,7 @@ async function handleVerification(interaction) {
         if (!verifiedRole) {
             return interaction.reply({
                 content: '❌ Verified role not found. Please contact an administrator.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -192,7 +192,7 @@ async function handleVerification(interaction) {
         if (member.roles.cache.has(verifiedRole.id)) {
             return interaction.reply({
                 content: '✅ You are already verified!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -209,7 +209,7 @@ async function handleVerification(interaction) {
             .setDescription(formatMessage(settings.success_message || defaultSuccessMessage))
             .setColor(verificationColor);
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         
         logger.info(`User ${member.user.tag} verified in guild ${interaction.guild.id}`);
 
@@ -218,7 +218,7 @@ async function handleVerification(interaction) {
         
         await interaction.reply({
             content: '❌ An error occurred during verification. Please try again or contact an administrator.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -236,7 +236,7 @@ async function handleGiveawayEntry(interaction) {
         if (!giveaway) {
             return await interaction.reply({
                 content: '❌ This giveaway is no longer active.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -245,7 +245,7 @@ async function handleGiveawayEntry(interaction) {
         if (Date.now() >= endTime.getTime()) {
             return await interaction.reply({
                 content: '❌ This giveaway has already ended.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -258,7 +258,7 @@ async function handleGiveawayEntry(interaction) {
         if (existingEntry) {
             return await interaction.reply({
                 content: '✅ You have already entered this giveaway! Good luck!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 
@@ -276,7 +276,7 @@ async function handleGiveawayEntry(interaction) {
 
         await interaction.reply({
             content: `🎉 You've successfully entered the giveaway for **${giveaway.prize}**!\n\n**Total Entries:** ${entriesCount.count}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         logger.info(`User ${interaction.user.tag} entered giveaway: ${giveaway.prize}`);
@@ -286,7 +286,7 @@ async function handleGiveawayEntry(interaction) {
         
         await interaction.reply({
             content: '❌ An error occurred while entering the giveaway. Please try again.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -305,7 +305,7 @@ async function handleTicketClose(interaction) {
     });
 
     if (!ticket) {
-        return interaction.reply({ content: '❌ This is not a ticket channel!', ephemeral: true });
+        return interaction.reply({ content: '❌ This is not a ticket channel!', flags: MessageFlags.Ephemeral });
     }
 
     // Check permissions
@@ -318,7 +318,7 @@ async function handleTicketClose(interaction) {
     if (!isTicketOwner && !hasStaffPerms && !hasSupportRole) {
         return interaction.reply({ 
             content: '❌ You don\'t have permission to close this ticket!', 
-            ephemeral: true 
+            flags: MessageFlags.Ephemeral 
         });
     }
 
@@ -350,7 +350,7 @@ async function handleTicketClose(interaction) {
         logger.info(`Ticket ${ticket.id} closed by ${interaction.user.tag}`);
     } catch (error) {
         logger.error('Error closing ticket:', error);
-        await interaction.reply({ content: '❌ Failed to close ticket!', ephemeral: true });
+        await interaction.reply({ content: '❌ Failed to close ticket!', flags: MessageFlags.Ephemeral });
     }
 }
 
@@ -361,7 +361,7 @@ async function handleSelfAssignRoles(interaction) {
     const member = interaction.member;
     
     if (!member) {
-        return interaction.reply({ content: '❌ Member not found!', ephemeral: true });
+        return interaction.reply({ content: '❌ Member not found!', flags: MessageFlags.Ephemeral });
     }
 
     const addedRoles = [];
@@ -433,5 +433,5 @@ async function handleSelfAssignRoles(interaction) {
         embed.addFields(fields);
     }
 
-    await interaction.reply({ embeds: [embed], ephemeral: true });
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const logger = require('../utils/logger');
 
 module.exports = {
@@ -90,7 +90,7 @@ module.exports = {
             logger.error('Error in games command:', error);
             await interaction.reply({ 
                 content: '❌ An error occurred while executing the game command.', 
-                ephemeral: true 
+                flags: MessageFlags.Ephemeral 
             });
         }
     }
