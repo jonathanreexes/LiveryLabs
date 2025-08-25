@@ -83,7 +83,7 @@ module.exports = {
                     });
                 }
                 
-                // Always ensure has full access 
+                // Always ensure owner has full access 
                 permissions.push({
                     id: interaction.guild.ownerId,
                     type: 2, // User type
