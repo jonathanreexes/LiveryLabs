@@ -217,7 +217,6 @@ module.exports = {
             } else if (subcommand === 'verify') {
                 const user = interaction.options.getUser('user');
                 const member = await interaction.guild.members.fetch(user.id);
-
                 const settings = await database.get(
                     'SELECT verified_role_id FROM guild_settings WHERE guild_id = ?',
                     [guildId]
