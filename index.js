@@ -5,6 +5,7 @@ const config = require('./config.json');
 const logger = require('./utils/logger');
 const database = require('./database/database');
 const backupService = require('./services/backupService');
+const express = require('express');
 require('dotenv').config();
 
 // Create Discord client with necessary intents
@@ -58,6 +59,27 @@ database.init().then(() => {
 
 // Start backup service
 backupService.startBackupSchedule();
+
+// Health check server for Koyeb deployment
+const app = express();
+const PORT = process.env.PORT || 8000;
+
+app.get('/', (req, res) => {
+    res.json({ 
+        status: 'Bot is running',
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        guilds: client.guilds ? client.guilds.cache.size : 0
+    });
+});
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy' });
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`Health check server running on port ${PORT}`);
+});
 
 // Error handling
 process.on('unhandledRejection', error => {
