@@ -17,7 +17,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('message')
-                        .setDescription('Custom verification message (use \\n for line breaks, • for bullets)'
+                        .setDescription('Custom verification message (use \\n for line breaks, • for bullets)')
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('title')
