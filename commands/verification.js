@@ -17,7 +17,7 @@ module.exports = {
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('message')
-                        .setDescription('Custom verification message (use \\n for line breaks, • for bullets)')
+                        .setDescription('Custom verification message (use \\n for line breaks, • for bullets)'
                         .setRequired(false))
                 .addStringOption(option =>
                     option.setName('title')
@@ -227,7 +227,6 @@ module.exports = {
                         .setTitle('❌ Setup Required')
                         .setDescription('Verification system is not set up. Use `/verification setup` first.')
                         .setColor(0xD3D3D3)
-
                     return await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 }
 
