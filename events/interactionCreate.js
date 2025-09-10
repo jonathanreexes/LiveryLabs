@@ -8,9 +8,6 @@ const OwnerAuth = require('../utils/ownerAuth');
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
-        // DEBUG: Log all interactions
-        console.log(`[DEBUG] Interaction received: ${interaction.type} - ${interaction.commandName || interaction.customId} from ${interaction.user.tag}`);
-        
         try {
             if (interaction.type === InteractionType.ApplicationCommand) {
                 await handleSlashCommand(interaction);
@@ -32,13 +29,9 @@ module.exports = {
 };
 
 async function handleSlashCommand(interaction) {
-    // Owner-only commands (sensitive/admin commands)
-    const ownerOnlyCommands = ['control', 'verification', 'welcome', 'permissions', 'mod'];
-    
-    if (ownerOnlyCommands.includes(interaction.commandName)) {
-        if (!await OwnerAuth.validateOwnerAccess(interaction)) {
-            return; // Already replied with error message
-        }
+    // Global owner-only validation for ALL commands
+    if (!await OwnerAuth.validateOwnerAccess(interaction)) {
+        return; // Already replied with error message
     }
 
     // If bot is sleeping, ignore all commands except from owner
