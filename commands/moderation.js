@@ -127,3 +127,13 @@ module.exports = {
         }
     }
 };
+processing the command. ')
+                .setColor(0xD3D3D3)
+
+            await interaction.reply({ embed" [errorEmbed],
+flags: Messageflags.Ephemeral });
+       }
+    }
+};
+processing the command. ')
+                .setColor()
