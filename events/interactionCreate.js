@@ -29,9 +29,13 @@ module.exports = {
 };
 
 async function handleSlashCommand(interaction) {
-    // Global owner-only validation for ALL commands
-    if (!await OwnerAuth.validateOwnerAccess(interaction)) {
-        return; // Already replied with error message
+    // Owner-only commands (sensitive/admin commands)
+    const ownerOnlyCommands = ['control', 'verification', 'welcome', 'permissions', 'mod'];
+    
+    if (ownerOnlyCommands.includes(interaction.commandName)) {
+        if (!await OwnerAuth.validateOwnerAccess(interaction)) {
+            return; // Already replied with error message
+        }
     }
 
     // If bot is sleeping, ignore all commands except from owner
