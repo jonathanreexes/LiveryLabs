@@ -8,6 +8,9 @@ const OwnerAuth = require('../utils/ownerAuth');
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
+        // DEBUG: Log all interactions
+        console.log(`[DEBUG] Interaction received: ${interaction.type} - ${interaction.commandName || interaction.customId} from ${interaction.user.tag}`);
+        
         try {
             if (interaction.type === InteractionType.ApplicationCommand) {
                 await handleSlashCommand(interaction);
