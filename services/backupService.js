@@ -6,23 +6,54 @@ const config = require('../config.json');
 
 class BackupService {
     constructor() {
-        this.backupDir = './backups';
-        this.dbPath = config.database.path;
+        this.initializePaths();
         this.isRunning = false;
+        this.backupEnabled = true;
         
         // Ensure backup directory exists
         this.ensureBackupDirectory();
+    }
+
+    initializePaths() {
+        // Determine paths based on environment
+        const isContainer = process.env.NODE_ENV === 'production' || process.env.KOYEB_SERVICE_NAME;
+        
+        // Backup directory
+        if (isContainer) {
+            this.backupDir = process.env.BACKUP_DIR || '/tmp/backups';
+            this.dbPath = process.env.DATABASE_PATH || config.database.containerPath || '/tmp/data/bot.db';
+        } else {
+            this.backupDir = process.env.BACKUP_DIR || config.paths?.backups || './backups';
+            this.dbPath = process.env.DATABASE_PATH || config.database.path;
+        }
+        
+        // Check if backups should be disabled
+        this.backupEnabled = config.backup?.enabled !== false && process.env.DISABLE_BACKUPS !== 'true';
+        
+        logger.info(`Backup service initialized: dir=${this.backupDir}, enabled=${this.backupEnabled}`);
     }
 
     /**
      * Ensure backup directory exists
      */
     async ensureBackupDirectory() {
+        if (!this.backupEnabled) {
+            logger.info('Backup service disabled');
+            return;
+        }
+        
         try {
             await fs.ensureDir(this.backupDir);
-            logger.info('Backup directory initialized');
+            
+            // Test write permissions
+            const testFile = path.join(this.backupDir, 'test-write.tmp');
+            await fs.writeFile(testFile, 'test');
+            await fs.remove(testFile);
+            
+            logger.info(`Backup directory initialized: ${this.backupDir}`);
         } catch (error) {
-            logger.error('Failed to create backup directory:', error);
+            logger.warn(`Backup directory not writable, disabling backups: ${error.message}`);
+            this.backupEnabled = false;
         }
     }
 
@@ -31,6 +62,11 @@ class BackupService {
      * @returns {Promise<string|null>} Backup filename or null if failed
      */
     async createBackup() {
+        if (!this.backupEnabled) {
+            logger.debug('Backup service disabled, skipping backup');
+            return null;
+        }
+        
         if (this.isRunning) {
             logger.warn('Backup already in progress, skipping...');
             return null;
@@ -235,7 +271,12 @@ class BackupService {
      * Start automatic backup schedule
      */
     startBackupSchedule() {
-        const schedule = config.backup.interval || '0 0 * * *'; // Default: daily at midnight
+        if (!this.backupEnabled) {
+            logger.info('Backup service disabled, skipping schedule setup');
+            return;
+        }
+        
+        const schedule = config.backup?.interval || '0 0 * * *'; // Default: daily at midnight
         
         if (!cron.validate(schedule)) {
             logger.error('Invalid backup schedule format');
@@ -272,6 +313,9 @@ class BackupService {
             const totalSize = backups.reduce((sum, backup) => sum + backup.size, 0);
             
             return {
+                enabled: this.backupEnabled,
+                backupDir: this.backupDir,
+                dbPath: this.dbPath,
                 totalBackups: backups.length,
                 totalSize: totalSize,
                 oldestBackup: backups.length > 0 ? backups[backups.length - 1].createdAt : null,
@@ -281,6 +325,9 @@ class BackupService {
         } catch (error) {
             logger.error('Failed to get backup stats:', error);
             return {
+                enabled: this.backupEnabled,
+                backupDir: this.backupDir,
+                dbPath: this.dbPath,
                 totalBackups: 0,
                 totalSize: 0,
                 oldestBackup: null,

@@ -3,12 +3,36 @@ const path = require('path');
 
 class Logger {
     constructor() {
-        this.logDir = './logs';
-        this.logFile = path.join(this.logDir, `bot-${new Date().toISOString().split('T')[0]}.log`);
+        this.initializePaths();
+        this.fileLoggingEnabled = this.initializeFileLogging();
+    }
+
+    initializePaths() {
+        // Determine log directory based on environment
+        const isContainer = process.env.NODE_ENV === 'production' || process.env.KOYEB_SERVICE_NAME;
+        const defaultLogDir = isContainer ? '/tmp/logs' : './logs';
         
-        // Create logs directory if it doesn't exist
-        if (!fs.existsSync(this.logDir)) {
-            fs.mkdirSync(this.logDir, { recursive: true });
+        this.logDir = process.env.LOG_DIR || defaultLogDir;
+        this.logFile = path.join(this.logDir, `bot-${new Date().toISOString().split('T')[0]}.log`);
+    }
+
+    initializeFileLogging() {
+        try {
+            // Create logs directory if it doesn't exist
+            if (!fs.existsSync(this.logDir)) {
+                fs.mkdirSync(this.logDir, { recursive: true });
+            }
+            
+            // Test write permissions
+            const testFile = path.join(this.logDir, 'test-write.tmp');
+            fs.writeFileSync(testFile, 'test');
+            fs.unlinkSync(testFile);
+            
+            console.log(`[LOGGER] File logging enabled: ${this.logDir}`);
+            return true;
+        } catch (error) {
+            console.warn(`[LOGGER] File logging disabled - using console only. Error: ${error.message}`);
+            return false;
         }
     }
 
@@ -22,10 +46,26 @@ class Logger {
     }
 
     writeToFile(formattedMessage) {
+        if (!this.fileLoggingEnabled) {
+            return; // Skip file writing if disabled
+        }
+        
         try {
+            // Refresh log file path daily
+            const currentDate = new Date().toISOString().split('T')[0];
+            const expectedLogFile = path.join(this.logDir, `bot-${currentDate}.log`);
+            
+            if (this.logFile !== expectedLogFile) {
+                this.logFile = expectedLogFile;
+            }
+            
             fs.appendFileSync(this.logFile, formattedMessage + '\n');
         } catch (error) {
-            console.error('Failed to write to log file:', error);
+            // Only log to console if file writing fails
+            if (this.fileLoggingEnabled) {
+                console.error('[LOGGER] Failed to write to log file, disabling file logging:', error.message);
+                this.fileLoggingEnabled = false;
+            }
         }
     }
 
@@ -63,7 +103,15 @@ class Logger {
 
     // Clean up old log files (keep last 7 days)
     cleanupLogs() {
+        if (!this.fileLoggingEnabled) {
+            return; // Skip cleanup if file logging is disabled
+        }
+        
         try {
+            if (!fs.existsSync(this.logDir)) {
+                return; // No log directory to clean
+            }
+            
             const files = fs.readdirSync(this.logDir);
             const now = new Date();
             const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
@@ -71,28 +119,57 @@ class Logger {
             files.forEach(file => {
                 if (file.startsWith('bot-') && file.endsWith('.log')) {
                     const filePath = path.join(this.logDir, file);
-                    const stats = fs.statSync(filePath);
-                    
-                    if (stats.mtime < sevenDaysAgo) {
-                        fs.unlinkSync(filePath);
-                        this.info(`Cleaned up old log file: ${file}`);
+                    try {
+                        const stats = fs.statSync(filePath);
+                        
+                        if (stats.mtime < sevenDaysAgo) {
+                            fs.unlinkSync(filePath);
+                            console.log(`[LOGGER] Cleaned up old log file: ${file}`);
+                        }
+                    } catch (fileError) {
+                        console.warn(`[LOGGER] Could not process log file ${file}:`, fileError.message);
                     }
                 }
             });
         } catch (error) {
-            this.error('Error cleaning up log files:', error);
+            console.error('[LOGGER] Error cleaning up log files:', error.message);
         }
+    }
+
+    // Get current logging configuration
+    getConfig() {
+        return {
+            logDir: this.logDir,
+            logFile: this.logFile,
+            fileLoggingEnabled: this.fileLoggingEnabled,
+            environment: process.env.NODE_ENV || 'development'
+        };
     }
 }
 
 const logger = new Logger();
 
-// Clean up logs on startup
-logger.cleanupLogs();
+// Clean up logs on startup (only if file logging is enabled)
+if (logger.fileLoggingEnabled) {
+    try {
+        logger.cleanupLogs();
+    } catch (error) {
+        console.warn('[LOGGER] Initial log cleanup failed:', error.message);
+    }
+}
 
-// Schedule daily log cleanup
-setInterval(() => {
-    logger.cleanupLogs();
-}, 24 * 60 * 60 * 1000); // 24 hours
+// Schedule daily log cleanup (only if file logging is enabled)
+if (logger.fileLoggingEnabled) {
+    setInterval(() => {
+        try {
+            logger.cleanupLogs();
+        } catch (error) {
+            console.warn('[LOGGER] Scheduled log cleanup failed:', error.message);
+        }
+    }, 24 * 60 * 60 * 1000); // 24 hours
+}
+
+// Log initialization status
+console.log('[LOGGER] Initialized with config:', logger.getConfig());
 
 module.exports = logger;

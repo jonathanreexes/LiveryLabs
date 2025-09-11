@@ -11,20 +11,52 @@ class Database {
 
     async init() {
         return new Promise((resolve, reject) => {
-            const dbPath = config.database.path;
+            // Determine database path based on environment
+            const isContainer = process.env.NODE_ENV === 'production' || process.env.KOYEB_SERVICE_NAME;
+            let dbPath;
+            
+            if (isContainer) {
+                dbPath = process.env.DATABASE_PATH || config.database.containerPath || '/tmp/data/bot.db';
+            } else {
+                dbPath = process.env.DATABASE_PATH || config.database.path;
+            }
+            
             const dbDir = path.dirname(dbPath);
             
-            // Create directory if it doesn't exist
-            if (!fs.existsSync(dbDir)) {
-                fs.mkdirSync(dbDir, { recursive: true });
+            // Create directory if it doesn't exist and path is not :memory:
+            if (dbPath !== ':memory:') {
+                try {
+                    if (!fs.existsSync(dbDir)) {
+                        fs.mkdirSync(dbDir, { recursive: true });
+                    }
+                } catch (error) {
+                    logger.warn(`Could not create database directory ${dbDir}: ${error.message}`);
+                    // Fallback to in-memory database if directory creation fails
+                    dbPath = ':memory:';
+                    logger.info('Using in-memory database as fallback');
+                }
             }
 
             this.db = new sqlite3.Database(dbPath, (err) => {
                 if (err) {
                     logger.error('Error opening database:', err);
-                    reject(err);
+                    // Try fallback to in-memory database
+                    if (dbPath !== ':memory:') {
+                        logger.info('Attempting fallback to in-memory database...');
+                        this.db = new sqlite3.Database(':memory:', (memErr) => {
+                            if (memErr) {
+                                logger.error('Failed to create in-memory database:', memErr);
+                                reject(memErr);
+                            } else {
+                                logger.info('Connected to in-memory SQLite database (fallback)');
+                                this.createTables().then(resolve).catch(reject);
+                            }
+                        });
+                    } else {
+                        reject(err);
+                    }
                 } else {
-                    logger.info('Connected to SQLite database');
+                    logger.info(`Connected to SQLite database: ${dbPath}`);
                     this.createTables().then(resolve).catch(reject);
                 }
             });

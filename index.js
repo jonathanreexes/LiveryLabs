@@ -68,9 +68,51 @@ for (const file of eventFiles) {
     logger.info(`Loaded event: ${event.name}`);
 }
 
+// Initialize environment configuration
+function initializeEnvironment() {
+    // Detect container environment
+    const isContainer = process.env.NODE_ENV === 'production' || process.env.KOYEB_SERVICE_NAME;
+    
+    if (isContainer) {
+        logger.info('Container environment detected, configuring for deployment');
+        
+        // Set container-friendly environment variables if not already set
+        if (!process.env.DATABASE_PATH) {
+            process.env.DATABASE_PATH = '/tmp/data/bot.db';
+        }
+        if (!process.env.LOG_DIR) {
+            process.env.LOG_DIR = '/tmp/logs';
+        }
+        if (!process.env.BACKUP_DIR) {
+            process.env.BACKUP_DIR = '/tmp/backups';
+        }
+        
+        // Disable file operations that might fail in containers if needed
+        if (process.env.DISABLE_FILE_LOGGING === undefined) {
+            process.env.DISABLE_FILE_LOGGING = 'false';
+        }
+        if (process.env.DISABLE_BACKUPS === undefined) {
+            process.env.DISABLE_BACKUPS = 'false';
+        }
+        
+        logger.info('Container configuration applied:', {
+            databasePath: process.env.DATABASE_PATH,
+            logDir: process.env.LOG_DIR,
+            backupDir: process.env.BACKUP_DIR,
+            fileLogging: process.env.DISABLE_FILE_LOGGING === 'false',
+            backups: process.env.DISABLE_BACKUPS === 'false'
+        });
+    } else {
+        logger.info('Development environment detected, using local file paths');
+    }
+}
+
 // Initialize services and database
 async function initialize() {
     try {
+        // Initialize environment configuration first
+        initializeEnvironment();
+        
         // Initialize database
         await database.init();
         logger.info('Database initialized successfully');

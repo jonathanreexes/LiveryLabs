@@ -2,7 +2,14 @@
     "prefix": "!",
     "token": "your_discord_token_here",
     "database": {
-        "path": "./database/bot.db"
+        "path": "./database/bot.db",
+        "containerPath": "/tmp/data/bot.db"
+    },
+    "paths": {
+        "logs": "./logs",
+        "backups": "./backups",
+        "containerLogs": "/tmp/logs",
+        "containerBackups": "/tmp/backups"
     },
     "moderation": {
         "defaultMuteDuration": 300,
@@ -32,7 +39,15 @@
     },
     "backup": {
         "interval": "0 0 * * *",
-        "retentionDays": 7
+        "retentionDays": 7,
+        "enabled": true,
+        "compress": true
+    },
+    "deployment": {
+        "environment": "development",
+        "useContainerPaths": false,
+        "gracefulShutdownTimeout": 30000,
+        "disableFileOperations": false
     },
     "botCustomization": {
         "allowAvatarChanges": true,
