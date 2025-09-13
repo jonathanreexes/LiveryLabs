@@ -22,15 +22,9 @@ class OwnerAuth {
      */
     static async validateOwnerAccess(interaction) {
         if (!this.isOwner(interaction)) {
-            // Check if user has permission to see commands but can't execute
-            const canSeeCommands = this.canSeeCommands(interaction);
-            
-            const message = canSeeCommands 
-                ? '🔒 You can see this command but only the server owner can execute it.'
-                : '❌ This command can only be used by the server owner.';
-            
+            // Quick response to prevent Discord timeout
             await interaction.reply({
-                content: message,
+                content: '❌ This command can only be used by the server owner.',
                 flags: MessageFlags.Ephemeral
             });
             
@@ -41,7 +35,7 @@ class OwnerAuth {
     }
 
     /**
-     * Check if user has roles that allow them to see commands
+     * Check if user has roles that allow them to see commands (optimized)
      * @param {Object} interaction - Discord interaction object
      * @returns {boolean} - True if user can see commands
      */
@@ -49,23 +43,20 @@ class OwnerAuth {
         const member = interaction.member;
         if (!member) return false;
 
-        // Roles that can see commands (but not execute them)
-        const allowedRoleNames = [
-            'Administrator',
-            'Admin', 
-            'Moderator',
-            'Mod',
-            'Staff',
-            'Helper',
-            'Bot Manager',
-            'Server Manager'
-        ];
+        // Quick check for common admin permissions
+        if (member.permissions.has('ADMINISTRATOR')) return true;
 
-        return member.roles.cache.some(role => 
-            allowedRoleNames.some(allowedName => 
-                role.name.toLowerCase().includes(allowedName.toLowerCase())
-            )
-        );
+        // Optimized role name checking
+        const allowedRoleNames = ['administrator', 'admin', 'moderator', 'mod', 'staff', 'helper', 'bot manager', 'server manager'];
+        
+        for (const role of member.roles.cache.values()) {
+            const roleName = role.name.toLowerCase();
+            if (allowedRoleNames.some(allowed => roleName.includes(allowed))) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
