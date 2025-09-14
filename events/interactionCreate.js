@@ -8,6 +8,23 @@ const OwnerAuth = require('../utils/ownerAuth');
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction) {
+        // Ultra-fast acknowledgment watchdog - 500ms maximum with safer defaults
+        const ackWatchdog = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                try {
+                    if (interaction.type === InteractionType.ApplicationCommand) {
+                        // Default to public reply for slash commands (safer for existing commands)
+                        await interaction.deferReply();
+                    } else if (interaction.type === InteractionType.MessageComponent) {
+                        // Default to deferUpdate for components (safer for button/select updates)
+                        await interaction.deferUpdate();
+                    }
+                } catch (ackError) {
+                    logger.error('Failed to acknowledge interaction:', ackError);
+                }
+            }
+        }, 500); // Acknowledge within 500ms maximum
+
         try {
             if (interaction.type === InteractionType.ApplicationCommand) {
                 await handleSlashCommand(interaction);
@@ -19,118 +36,215 @@ module.exports = {
             
             const errorMessage = '❌ An unexpected error occurred while processing your interaction.';
             
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
-            } else {
-                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+            try {
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                } else {
+                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                }
+            } catch (responseError) {
+                logger.error('Failed to send error response:', responseError);
             }
+        } finally {
+            clearTimeout(ackWatchdog);
         }
     }
 };
 
 async function handleSlashCommand(interaction) {
-    // Global owner-only validation for ALL commands
-    if (!await OwnerAuth.validateOwnerAccess(interaction)) {
-        return; // Already replied with error message
-    }
-
-    // If bot is sleeping, ignore all commands except from owner
-    if (global.botSleeping && !OwnerAuth.isOwner(interaction)) {
-        return await interaction.reply({
-            content: '💤 Bot is currently sleeping. Ask the server owner to wake it up.',
-            flags: MessageFlags.Ephemeral
-        });
-    }
-
-    const command = interaction.client.commands.get(interaction.commandName);
-
-    if (!command) {
-        logger.warn(`Unknown command: ${interaction.commandName}`);
-        return interaction.reply({ 
-            content: '❌ Unknown command!', 
-            flags: MessageFlags.Ephemeral 
-        });
-    }
-
-    // Rate limiting
-    const isRateLimited = rateLimiter.checkRateLimit(interaction.user.id, interaction.commandName);
-    if (isRateLimited) {
-        return interaction.reply({ 
-            content: '⏰ You\'re using commands too fast! Please slow down.', 
-            flags: MessageFlags.Ephemeral 
-        });
-    }
-
-    // Check if command is being used in DM when it requires a guild
-    if (!interaction.guild && command.guildOnly) {
-        return interaction.reply({ 
-            content: '❌ This command can only be used in servers!', 
-            flags: MessageFlags.Ephemeral 
-        });
-    }
-
-    // Check bot permissions
-    if (interaction.guild) {
-        const botMember = interaction.guild.members.me;
-        if (command.botPermissions && !botMember.permissions.has(command.botPermissions)) {
-            return interaction.reply({ 
-                content: '❌ I don\'t have the required permissions to execute this command!', 
-                flags: MessageFlags.Ephemeral 
-            });
+    // Proactive acknowledgment within 250ms - default to public reply for compatibility
+    if (!interaction.replied && !interaction.deferred) {
+        try {
+            await interaction.deferReply();
+        } catch (ackError) {
+            logger.error('Failed to proactively acknowledge slash command:', ackError);
         }
     }
 
-    // Execute command
+    // Global owner-only validation for ALL commands
     try {
-        logger.info(`Command executed: ${interaction.commandName} by ${interaction.user.tag} in ${interaction.guild?.name || 'DM'}`);
-        await command.execute(interaction);
-    } catch (error) {
-        logger.error(`Error executing command ${interaction.commandName}:`, error);
-        
-        const errorMessage = '❌ There was an error executing this command!';
-        
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+        if (!await OwnerAuth.validateOwnerAccess(interaction)) {
+            return; // Already replied with error message
+        }
+    } catch (authError) {
+        logger.error('Error in owner validation:', authError);
+        const errorMsg = '❌ Authorization check failed.';
+        if (interaction.deferred) {
+            return await interaction.editReply({ content: errorMsg });
         } else {
-            await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+            return await interaction.reply({ content: errorMsg, flags: MessageFlags.Ephemeral });
+        }
+    }
+
+    // Helper function to respond appropriately based on interaction state
+    const respondToInteraction = async (content, ephemeral = true) => {
+        if (interaction.deferred) {
+            return await interaction.editReply({ content });
+        } else if (interaction.replied) {
+            return await interaction.followUp({ content, flags: ephemeral ? MessageFlags.Ephemeral : undefined });
+        } else {
+            return await interaction.reply({ content, flags: ephemeral ? MessageFlags.Ephemeral : undefined });
+        }
+    };
+
+    try {
+        // If bot is sleeping, ignore all commands except from owner
+        if (global.botSleeping && !OwnerAuth.isOwner(interaction)) {
+            return await respondToInteraction('💤 Bot is currently sleeping. Ask the server owner to wake it up.');
+        }
+
+        const command = interaction.client.commands.get(interaction.commandName);
+
+        if (!command) {
+            logger.warn(`Unknown command: ${interaction.commandName}`);
+            return await respondToInteraction('❌ Unknown command!');
+        }
+
+        // Rate limiting
+        const isRateLimited = rateLimiter.checkRateLimit(interaction.user.id, interaction.commandName);
+        if (isRateLimited) {
+            return await respondToInteraction('⏰ You\'re using commands too fast! Please slow down.');
+        }
+
+        // Check if command is being used in DM when it requires a guild
+        if (!interaction.guild && command.guildOnly) {
+            return await respondToInteraction('❌ This command can only be used in servers!');
+        }
+
+        // Check bot permissions
+        if (interaction.guild) {
+            const botMember = interaction.guild.members.me;
+            if (command.botPermissions && !botMember.permissions.has(command.botPermissions)) {
+                return await respondToInteraction('❌ I don\'t have the required permissions to execute this command!');
+            }
+        }
+
+        // Execute command
+        logger.info(`Command executed: ${interaction.commandName} by ${interaction.user.tag} in ${interaction.guild?.name || 'DM'}`);
+        
+        // Execute command with error handling but no artificial timeout
+        await command.execute(interaction).catch(async (error) => {
+            logger.error(`Error executing command ${interaction.commandName}:`, error);
+            
+            const errorMessage = '❌ There was an error executing this command!';
+            
+            try {
+                await respondToInteraction(errorMessage);
+            } catch (responseError) {
+                logger.error('Failed to send command error response:', responseError);
+            }
+        });
+        
+    } catch (error) {
+        logger.error(`Error in command handling for ${interaction.commandName}:`, error);
+        try {
+            await respondToInteraction('❌ An unexpected error occurred!');
+        } catch (responseError) {
+            logger.error('Failed to send error response:', responseError);
         }
     }
 }
 
+// Smart response helper that handles deferred states correctly
+const createResponseHelper = (interaction) => {
+    return {
+        // Acknowledge immediately if not already done
+        ack: async (options = {}) => {
+            if (!interaction.replied && !interaction.deferred) {
+                const { ephemeral = true, update = false } = options;
+                
+                if (update && interaction.type === InteractionType.MessageComponent) {
+                    await interaction.deferUpdate();
+                } else {
+                    await interaction.deferReply({ ephemeral });
+                }
+            }
+        },
+
+        respond: async (payload) => {
+            if (interaction.deferred) {
+                return await interaction.editReply(payload);
+            } else if (interaction.replied) {
+                return await interaction.followUp(payload);
+            } else {
+                return await interaction.reply(payload);
+            }
+        },
+        
+        respondEphemeral: async (content) => {
+            if (interaction.deferred) {
+                // If already deferred, use editReply for primary response or followUp for additional
+                return await interaction.editReply({ content });
+            } else if (interaction.replied) {
+                return await interaction.followUp({ content, flags: MessageFlags.Ephemeral });
+            } else {
+                return await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+            }
+        },
+
+        update: async (payload) => {
+            // For message component updates - smart routing based on defer type
+            if (interaction.deferred) {
+                // If deferred with deferUpdate, use editReply to update the original message
+                // If deferred with deferReply, this will edit the deferred reply instead
+                return await interaction.editReply(payload);
+            } else {
+                return await interaction.update(payload);
+            }
+        }
+    };
+};
+
 async function handleMessageComponent(interaction) {
     const { customId } = interaction;
+    
+    // Proactive acknowledgment within 250ms - default to deferUpdate for safer button/select behavior
+    if (!interaction.replied && !interaction.deferred) {
+        try {
+            // Components that need ephemeral responses instead of message updates
+            const needsEphemeralReply = ['verify_user', 'enter_giveaway', 'create_ticket'].includes(customId);
+            
+            if (needsEphemeralReply) {
+                await interaction.deferReply({ ephemeral: true });
+            } else {
+                await interaction.deferUpdate();
+            }
+        } catch (ackError) {
+            logger.error('Failed to proactively acknowledge component:', ackError);
+        }
+    }
+    
+    const responder = createResponseHelper(interaction);
 
     try {
         if (customId === 'verify_user') {
-            await handleVerification(interaction);
+            await handleVerification(interaction, responder);
         } else if (customId === 'enter_giveaway') {
-            await handleGiveawayEntry(interaction);
+            await handleGiveawayEntry(interaction, responder);
         } else if (customId === 'create_ticket') {
-            await handleTicketCreation(interaction);
+            await handleTicketCreation(interaction, responder);
         } else if (customId === 'ticket_close') {
-            await handleTicketClose(interaction);
+            await handleTicketClose(interaction, responder);
         } else if (customId.startsWith('trivia_')) {
             // Trivia button interactions are handled in the games command
             return;
         } else if (customId === 'self_assign_roles') {
-            await handleSelfAssignRoles(interaction);
+            await handleSelfAssignRoles(interaction, responder);
         } else {
             logger.warn(`Unknown component interaction: ${customId}`);
         }
     } catch (error) {
         logger.error(`Error handling component interaction ${customId}:`, error);
         
-        const errorMessage = '❌ There was an error processing your interaction!';
-        
-        if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
-        } else {
-            await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+        try {
+            await responder.respondEphemeral('❌ There was an error processing your interaction!');
+        } catch (responseError) {
+            logger.error('Failed to send component error response:', responseError);
         }
     }
 }
 
-async function handleTicketCreation(interaction) {
+async function handleTicketCreation(interaction, responder) {
     // Check if user already has an open ticket
     const existingTicket = await new Promise((resolve, reject) => {
         database.db.get(
@@ -144,10 +258,7 @@ async function handleTicketCreation(interaction) {
     });
 
     if (existingTicket) {
-        return interaction.reply({ 
-            content: '❌ You already have an open ticket! Please close it before creating a new one.', 
-            flags: MessageFlags.Ephemeral 
-        });
+        return await responder.respondEphemeral('❌ You already have an open ticket! Please close it before creating a new one.');
     }
 
     // Use the ticket create command logic
@@ -163,7 +274,7 @@ async function handleTicketCreation(interaction) {
     }
 }
 
-async function handleVerification(interaction) {
+async function handleVerification(interaction, responder) {
     try {
         // Check verification settings including all customizations
         const settings = await database.get(
@@ -172,28 +283,19 @@ async function handleVerification(interaction) {
         );
 
         if (!settings?.verification_enabled || !settings?.verified_role_id) {
-            return interaction.reply({
-                content: '❌ Verification is not properly configured on this server.',
-                flags: MessageFlags.Ephemeral
-            });
+            return await responder.respondEphemeral('❌ Verification is not properly configured on this server.');
         }
 
         const member = interaction.member;
         const verifiedRole = interaction.guild.roles.cache.get(settings.verified_role_id);
 
         if (!verifiedRole) {
-            return interaction.reply({
-                content: '❌ Verified role not found. Please contact an administrator.',
-                flags: MessageFlags.Ephemeral
-            });
+            return await responder.respondEphemeral('❌ Verified role not found. Please contact an administrator.');
         }
 
         // Check if user already has verified role
         if (member.roles.cache.has(verifiedRole.id)) {
-            return interaction.reply({
-                content: '✅ You are already verified!',
-                flags: MessageFlags.Ephemeral
-            });
+            return await responder.respondEphemeral('✅ You are already verified!');
         }
 
         // Add verified role
@@ -209,21 +311,17 @@ async function handleVerification(interaction) {
             .setDescription(formatMessage(settings.success_message || defaultSuccessMessage))
             .setColor(verificationColor);
 
-        await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        await responder.respond({ embeds: [embed], flags: MessageFlags.Ephemeral });
         
         logger.info(`User ${member.user.tag} verified in guild ${interaction.guild.id}`);
 
     } catch (error) {
         logger.error('Error in verification process:', error);
-        
-        await interaction.reply({
-            content: '❌ An error occurred during verification. Please try again or contact an administrator.',
-            flags: MessageFlags.Ephemeral
-        });
+        await responder.respondEphemeral('❌ An error occurred during verification. Please try again or contact an administrator.');
     }
 }
 
-async function handleGiveawayEntry(interaction) {
+async function handleGiveawayEntry(interaction, responder) {
     try {
         const messageId = interaction.message.id;
         
@@ -234,19 +332,13 @@ async function handleGiveawayEntry(interaction) {
         );
 
         if (!giveaway) {
-            return await interaction.reply({
-                content: '❌ This giveaway is no longer active.',
-                flags: MessageFlags.Ephemeral
-            });
+            return await responder.respondEphemeral('❌ This giveaway is no longer active.');
         }
 
         // Check if giveaway has ended
         const endTime = new Date(giveaway.end_time);
         if (Date.now() >= endTime.getTime()) {
-            return await interaction.reply({
-                content: '❌ This giveaway has already ended.',
-                flags: MessageFlags.Ephemeral
-            });
+            return await responder.respondEphemeral('❌ This giveaway has already ended.');
         }
 
         // Check if user already entered
@@ -256,10 +348,7 @@ async function handleGiveawayEntry(interaction) {
         );
 
         if (existingEntry) {
-            return await interaction.reply({
-                content: '✅ You have already entered this giveaway! Good luck!',
-                flags: MessageFlags.Ephemeral
-            });
+            return await responder.respondEphemeral('✅ You have already entered this giveaway! Good luck!');
         }
 
         // Add entry
@@ -274,24 +363,17 @@ async function handleGiveawayEntry(interaction) {
             [messageId]
         );
 
-        await interaction.reply({
-            content: `🎉 You've successfully entered the giveaway for **${giveaway.prize}**!\n\n**Total Entries:** ${entriesCount.count}`,
-            flags: MessageFlags.Ephemeral
-        });
+        await responder.respondEphemeral(`🎉 You've successfully entered the giveaway for **${giveaway.prize}**!\n\n**Total Entries:** ${entriesCount.count}`);
 
         logger.info(`User ${interaction.user.tag} entered giveaway: ${giveaway.prize}`);
 
     } catch (error) {
         logger.error('Error handling giveaway entry:', error);
-        
-        await interaction.reply({
-            content: '❌ An error occurred while entering the giveaway. Please try again.',
-            flags: MessageFlags.Ephemeral
-        });
+        await responder.respondEphemeral('❌ An error occurred while entering the giveaway. Please try again.');
     }
 }
 
-async function handleTicketClose(interaction) {
+async function handleTicketClose(interaction, responder) {
     // Check if this is a ticket channel
     const ticket = await new Promise((resolve, reject) => {
         database.db.get(
@@ -305,7 +387,7 @@ async function handleTicketClose(interaction) {
     });
 
     if (!ticket) {
-        return interaction.reply({ content: '❌ This is not a ticket channel!', flags: MessageFlags.Ephemeral });
+        return await responder.respondEphemeral('❌ This is not a ticket channel!');
     }
 
     // Check permissions
@@ -316,10 +398,7 @@ async function handleTicketClose(interaction) {
     const hasSupportRole = supportRole && interaction.member.roles.cache.has(supportRole.id);
 
     if (!isTicketOwner && !hasStaffPerms && !hasSupportRole) {
-        return interaction.reply({ 
-            content: '❌ You don\'t have permission to close this ticket!', 
-            flags: MessageFlags.Ephemeral 
-        });
+        return await responder.respondEphemeral('❌ You don\'t have permission to close this ticket!');
     }
 
     try {
@@ -336,7 +415,7 @@ async function handleTicketClose(interaction) {
             )
             .setTimestamp();
 
-        await interaction.reply({ embeds: [closeEmbed] });
+        await responder.respond({ embeds: [closeEmbed] });
 
         // Delete channel after 10 seconds
         setTimeout(async () => {
@@ -350,18 +429,18 @@ async function handleTicketClose(interaction) {
         logger.info(`Ticket ${ticket.id} closed by ${interaction.user.tag}`);
     } catch (error) {
         logger.error('Error closing ticket:', error);
-        await interaction.reply({ content: '❌ Failed to close ticket!', flags: MessageFlags.Ephemeral });
+        await responder.respondEphemeral('❌ Failed to close ticket!');
     }
 }
 
-async function handleSelfAssignRoles(interaction) {
+async function handleSelfAssignRoles(interaction, responder) {
     if (!interaction.isStringSelectMenu()) return;
 
     const selectedRoleIds = interaction.values;
     const member = interaction.member;
     
     if (!member) {
-        return interaction.reply({ content: '❌ Member not found!', flags: MessageFlags.Ephemeral });
+        return await responder.respondEphemeral('❌ Member not found!');
     }
 
     const addedRoles = [];
@@ -433,5 +512,5 @@ async function handleSelfAssignRoles(interaction) {
         embed.addFields(fields);
     }
 
-    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await responder.respond({ embeds: [embed], flags: MessageFlags.Ephemeral });
 }
