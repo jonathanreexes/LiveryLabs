@@ -164,3 +164,18 @@ initialize().then(() => {
     logger.error('Failed to initialize bot:', error);
     process.exit(1);
 });
+// --- health server for Koyeb ---
+const http = require('http');
+const port = process.env.PORT || 8000;
+
+const server = http.createServer((req, res) => {
+  if (req.url === '/') {
+    res.writeHead(200);
+    res.end('OK');
+  } else {
+    res.writeHead(404);
+    res.end('Not Found');
+  }
+});
+
+server.listen(port, () => console.log(`Health server running on port ${port}`));
