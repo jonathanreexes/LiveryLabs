@@ -33,6 +33,13 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
 
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply().catch(() => {});
+            }
+        }, 250);
+
         try {
             switch (subcommand) {
                 case 'setup':
@@ -45,15 +52,24 @@ module.exports = {
                     await this.handleUpdate(interaction);
                     break;
             }
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in permissions command:', error);
             
             const errorMessage = '❌ An error occurred while managing permissions.';
             
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
-            } else {
-                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                } else if (interaction.deferred) {
+                    await interaction.editReply({ content: errorMessage });
+                } else {
+                    await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
             }
         }
     },

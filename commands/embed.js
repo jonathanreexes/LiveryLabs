@@ -45,8 +45,17 @@ module.exports = {
                 .setRequired(false)),
 
     async execute(interaction) {
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral }).catch(() => {});
+            }
+        }, 250);
+
         try {
-            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            if (!interaction.deferred) {
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            }
 
             const title = interaction.options.getString('title');
             const message = interaction.options.getString('message');
@@ -172,15 +181,22 @@ module.exports = {
 
             logger.info(`Custom embed created by ${interaction.user.tag} in ${interaction.guild.name}: ${title}`);
 
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in embed command:', error);
             
             const errorMessage = '❌ An error occurred while creating the embed.';
             
-            if (interaction.deferred) {
-                await interaction.editReply({ content: errorMessage });
-            } else {
-                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+            try {
+                if (interaction.deferred) {
+                    await interaction.editReply({ content: errorMessage });
+                } else if (!interaction.replied) {
+                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
             }
         }
     },

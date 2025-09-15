@@ -69,6 +69,13 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         const guildId = interaction.guild.id;
 
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply().catch(() => {});
+            }
+        }, 250);
+
         try {
             if (subcommand === 'setup') {
                 let verifiedRole = interaction.options.getRole('verified_role');
@@ -271,7 +278,10 @@ module.exports = {
                 await interaction.reply({ embeds: [embed] });
             }
 
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in verification command:', error);
             
             const errorEmbed = new EmbedBuilder()
@@ -279,7 +289,15 @@ module.exports = {
                 .setDescription('An error occurred while processing the verification command.')
                 .setColor(0xD3D3D3)
 
-            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+                } else if (interaction.deferred) {
+                    await interaction.editReply({ embeds: [errorEmbed] });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
+            }
         }
     }
 };

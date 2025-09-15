@@ -113,6 +113,13 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         const guildId = interaction.guild.id;
 
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply().catch(() => {});
+            }
+        }, 250);
+
         try {
             if (subcommand === 'setup') {
                 const welcomeChannel = interaction.options.getChannel('welcome_channel');
@@ -271,12 +278,26 @@ module.exports = {
                 await interaction.reply({ embeds: [embed] });
             }
 
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in welcome command:', error);
-            await interaction.reply({ 
-                content: '❌ An error occurred while processing the welcome command.', 
-                flags: MessageFlags.Ephemeral 
-            });
+            
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ 
+                        content: '❌ An error occurred while processing the welcome command.', 
+                        flags: MessageFlags.Ephemeral 
+                    });
+                } else if (interaction.deferred) {
+                    await interaction.editReply({ 
+                        content: '❌ An error occurred while processing the welcome command.' 
+                    });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
+            }
         }
     }
 };

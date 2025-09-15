@@ -84,6 +84,13 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
 
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply().catch(() => {});
+            }
+        }, 250);
+
         try {
             switch (subcommand) {
                 case 'userinfo':
@@ -117,12 +124,27 @@ module.exports = {
                     await handleCustomizations(interaction);
                     break;
             }
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in utility command:', error);
-            await interaction.reply({ 
-                content: '❌ An error occurred while executing the utility command.', 
-                flags: MessageFlags.Ephemeral 
-            });
+            
+            // Fix: Use proper interaction state handling
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ 
+                        content: '❌ An error occurred while executing the utility command.', 
+                        flags: MessageFlags.Ephemeral 
+                    });
+                } else if (interaction.deferred) {
+                    await interaction.editReply({ 
+                        content: '❌ An error occurred while executing the utility command.' 
+                    });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
+            }
         }
     }
 };

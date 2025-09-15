@@ -82,6 +82,13 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
 
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply().catch(() => {});
+            }
+        }, 250);
+
         try {
             if (subcommand === 'create') {
                 await this.createGiveaway(interaction);
@@ -92,15 +99,24 @@ module.exports = {
             } else if (subcommand === 'list') {
                 await this.listGiveaways(interaction);
             }
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in giveaway command:', error);
             
             const errorMessage = '❌ An error occurred while processing the giveaway command.';
             
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
-            } else {
-                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                } else if (interaction.deferred) {
+                    await interaction.editReply({ content: errorMessage });
+                } else {
+                    await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
             }
         }
     },
