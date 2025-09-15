@@ -169,9 +169,18 @@ async function handlePause(interaction) {
             .setDescription('The music has been paused')
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ embeds: [embed] });
+        }
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
+        const content = `❌ ${result.error}`;
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.editReply({ content });
+        }
     }
 }
 
@@ -185,9 +194,18 @@ async function handleResume(interaction) {
             .setDescription('The music has been resumed')
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ embeds: [embed] });
+        }
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
+        const content = `❌ ${result.error}`;
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.editReply({ content });
+        }
     }
 }
 
@@ -201,9 +219,18 @@ async function handleStop(interaction) {
             .setDescription('Music stopped and queue cleared')
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ embeds: [embed] });
+        }
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
+        const content = `❌ ${result.error}`;
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.editReply({ content });
+        }
     }
 }
 
@@ -217,9 +244,18 @@ async function handleSkip(interaction) {
             .setDescription(result.nextTrack ? `Now playing: **${result.nextTrack.title}**` : 'Queue is now empty')
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ embeds: [embed] });
+        }
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
+        const content = `❌ ${result.error}`;
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.editReply({ content });
+        }
     }
 }
 
@@ -227,7 +263,12 @@ async function handleQueue(interaction) {
     const queue = musicPlayer.getQueue(interaction.guild.id);
     
     if (!queue || queue.length === 0) {
-        return interaction.reply({ content: '❌ The music queue is empty!', flags: MessageFlags.Ephemeral });
+        const content = '❌ The music queue is empty!';
+        if (!interaction.replied && !interaction.deferred) {
+            return interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            return interaction.editReply({ content });
+        }
     }
 
     const embed = new EmbedBuilder()
@@ -246,7 +287,11 @@ async function handleQueue(interaction) {
         embed.setFooter({ text: `And ${queue.length - 10} more songs...` });
     }
 
-    await interaction.reply({ embeds: [embed] });
+    if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ embeds: [embed] });
+    } else {
+        await interaction.editReply({ embeds: [embed] });
+    }
 }
 
 async function handleVolume(interaction) {
@@ -260,9 +305,18 @@ async function handleVolume(interaction) {
             .setDescription(`Volume set to **${volume}%**`)
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ embeds: [embed] });
+        }
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
+        const content = `❌ ${result.error}`;
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.editReply({ content });
+        }
     }
 }
 
@@ -270,7 +324,12 @@ async function handleNowPlaying(interaction) {
     const nowPlaying = musicPlayer.getNowPlaying(interaction.guild.id);
     
     if (!nowPlaying) {
-        return interaction.reply({ content: '❌ Nothing is currently playing!', flags: MessageFlags.Ephemeral });
+        const content = '❌ Nothing is currently playing!';
+        if (!interaction.replied && !interaction.deferred) {
+            return interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            return interaction.editReply({ content });
+        }
     }
 
     const embed = new EmbedBuilder()
@@ -284,7 +343,11 @@ async function handleNowPlaying(interaction) {
         .setThumbnail(nowPlaying.thumbnail || null)
         .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ embeds: [embed] });
+    } else {
+        await interaction.editReply({ embeds: [embed] });
+    }
 }
 
 async function handleLeave(interaction) {
@@ -297,8 +360,17 @@ async function handleLeave(interaction) {
             .setDescription('Disconnected from voice channel and cleared the queue')
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ embeds: [embed] });
+        } else {
+            await interaction.editReply({ embeds: [embed] });
+        }
     } else {
-        await interaction.reply({ content: `❌ ${result.error}`, flags: MessageFlags.Ephemeral });
+        const content = `❌ ${result.error}`;
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.editReply({ content });
+        }
     }
 }
