@@ -56,16 +56,24 @@ module.exports = {
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
 
-        // Check if user is in a voice channel
-        const voiceChannel = interaction.member.voice.channel;
-        if (!voiceChannel && !['queue', 'nowplaying'].includes(subcommand)) {
-            return interaction.reply({ 
-                content: '❌ You need to be in a voice channel to use music commands!', 
-                flags: MessageFlags.Ephemeral 
-            });
-        }
+        // Timeout protection - acknowledge immediately
+        const timeoutId = setTimeout(async () => {
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.deferReply().catch(() => {});
+            }
+        }, 250);
 
         try {
+            // Check if user is in a voice channel
+            const voiceChannel = interaction.member.voice.channel;
+            if (!voiceChannel && !['queue', 'nowplaying'].includes(subcommand)) {
+                clearTimeout(timeoutId);
+                return interaction.reply({ 
+                    content: '❌ You need to be in a voice channel to use music commands!', 
+                    flags: MessageFlags.Ephemeral 
+                });
+            }
+
             switch (subcommand) {
                 case 'play':
                     await handlePlay(interaction, voiceChannel);
@@ -95,12 +103,27 @@ module.exports = {
                     await handleLeave(interaction);
                     break;
             }
+            
+            clearTimeout(timeoutId);
         } catch (error) {
+            clearTimeout(timeoutId);
             logger.error('Error in music command:', error);
-            await interaction.reply({ 
-                content: '❌ An error occurred while executing the music command.', 
-                flags: MessageFlags.Ephemeral 
-            });
+            
+            // Fix: Use proper interaction state handling
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ 
+                        content: '❌ An error occurred while executing the music command.', 
+                        flags: MessageFlags.Ephemeral 
+                    });
+                } else if (interaction.deferred) {
+                    await interaction.editReply({ 
+                        content: '❌ An error occurred while executing the music command.' 
+                    });
+                }
+            } catch (replyError) {
+                logger.error('Failed to send error message:', replyError);
+            }
         }
     }
 };
