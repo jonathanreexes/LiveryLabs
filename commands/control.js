@@ -28,7 +28,11 @@ module.exports = {
         try {
             switch (subcommand) {
                 case 'restart':
-                    await interaction.reply('🍍 Restarting bot...');
+                    if (interaction.deferred) {
+                        await interaction.editReply('🍍 Restarting bot...');
+                    } else {
+                        await interaction.reply('🍍 Restarting bot...');
+                    }
                     logger.info(`Bot restart triggered via slash command by owner: ${interaction.user.tag}`);
                     
                     // Graceful restart
@@ -38,7 +42,11 @@ module.exports = {
                     break;
 
                 case 'sleep':
-                    await interaction.reply('💤 Bot going to sleep... Use `/control wake` to wake me up.');
+                    if (interaction.deferred) {
+                        await interaction.editReply('💤 Bot going to sleep... Use `/control wake` to wake me up.');
+                    } else {
+                        await interaction.reply('💤 Bot going to sleep... Use `/control wake` to wake me up.');
+                    }
                     logger.info(`Bot sleep mode activated via slash command by owner: ${interaction.user.tag}`);
                     
                     // Set bot to invisible and stop responding to commands
@@ -53,13 +61,21 @@ module.exports = {
 
                 case 'wake':
                     if (!global.botSleeping) {
-                        return await interaction.reply({
-                            content: '☀️ Bot is already awake!',
-                            flags: MessageFlags.Ephemeral
-                        });
+                        if (interaction.deferred) {
+                            return await interaction.editReply('☀️ Bot is already awake!');
+                        } else {
+                            return await interaction.reply({
+                                content: '☀️ Bot is already awake!',
+                                flags: MessageFlags.Ephemeral
+                            });
+                        }
                     }
 
-                    await interaction.reply('🌅 Bot is now awake and ready!');
+                    if (interaction.deferred) {
+                        await interaction.editReply('🌅 Bot is now awake and ready!');
+                    } else {
+                        await interaction.reply('🌅 Bot is now awake and ready!');
+                    }
                     logger.info(`Bot wake mode activated via slash command by owner: ${interaction.user.tag}`);
                     
                     // Set bot back to online
@@ -101,17 +117,23 @@ module.exports = {
                         timestamp: new Date().toISOString()
                     };
 
-                    await interaction.reply({ embeds: [statusEmbed] });
+                    if (interaction.deferred) {
+                        await interaction.editReply({ embeds: [statusEmbed] });
+                    } else {
+                        await interaction.reply({ embeds: [statusEmbed] });
+                    }
                     break;
             }
         } catch (error) {
             logger.error('Error in control command:', error);
             
-            if (!interaction.replied) {
+            if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ An error occurred while executing the control command.',
                     flags: MessageFlags.Ephemeral
                 });
+            } else if (interaction.deferred) {
+                await interaction.editReply('❌ An error occurred while executing the control command.');
             }
         }
     }
