@@ -3,3 +3,18 @@ node_modules/
 .replit
 repl.it
 replit.nix
+
+# Database files
+database/bot.db
+*.db
+
+# Log files  
+logs/
+*.log
+
+# Backup files
+backups/
+
+# Temporary files
+temp/
+attached_assets/
